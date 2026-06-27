@@ -4,9 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Seekers vs Hiders</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   </head>
   <body>
     <!-- Game Canvas -->
@@ -14,40 +11,50 @@
 
     <!-- Main Menu Overlay -->
     <div id="mainMenu" class="overlay">
-      <div class="glass-panel">
-        <h1>Seekers vs Hiders</h1>
-        <div class="input-group">
-          <label for="nickname">Nickname</label>
-          <input type="text" id="nickname" placeholder="Enter your name..." />
+      <div class="menu-container">
+        <h1 class="logo-title">Seekers vs Hiders</h1>
+        
+        <div class="form-container">
+          <div class="main-action">
+            <button id="btnCreate" class="btn primary-btn">Create Room</button>
+            <button id="btnMyRoom" class="btn primary-btn">My Room</button>
+          </div>
+          
+          <div class="login-box">
+            <input type="text" id="nickname" placeholder="Nickname" />
+            <input type="text" id="roomId" placeholder="Room ID (optional)" />
+            <button id="btnJoin" class="btn action-btn">Join Room</button>
+            <p id="menuError" class="error-msg"></p>
+          </div>
         </div>
         
-        <div class="input-group">
-          <label for="roomId">Room ID (optional)</label>
-          <input type="text" id="roomId" placeholder="Enter code to join..." />
+        <div class="panels-container">
+          <div class="info-panel">
+            <h3>Changelog</h3>
+            <ul>
+              <li>Initial release</li>
+              <li>Minimalistic UI update</li>
+            </ul>
+          </div>
+          <div class="info-panel">
+            <h3>How to Play</h3>
+            <p>WASD to move.<br>Seekers touch hiders.<br>Hiders survive.</p>
+          </div>
         </div>
-
-        <div class="button-group">
-          <button id="btnJoin" class="btn primary">Join Room</button>
-          <button id="btnCreate" class="btn secondary">Create New Room</button>
-          <button id="btnMyRoom" class="btn outline">Go to My Room</button>
-        </div>
-        <p id="menuError" class="error-msg"></p>
       </div>
     </div>
 
     <!-- In-Game UI -->
     <div id="inGameUI" class="overlay hidden">
-      <!-- Top info bar -->
-      <div class="top-bar glass-panel">
-        <span id="roomInfo">Room: ---</span>
-        <span id="gameState">Status: Lobby</span>
-        <span id="playerRole">Role: ---</span>
+      <div class="top-bar">
+        <div id="gameState">Lobby</div>
+        <div style="font-size: 0.4em; color: #555; text-align: center;" id="playerRole">Role: ---</div>
+        <div style="font-size: 0.4em; color: #555; text-align: center;" id="roomInfo">Room: ---</div>
       </div>
 
-      <!-- Chat UI (Bottom Left) -->
-      <div id="chatBox" class="chat-container glass-panel">
+      <div id="chatBox" class="chat-container">
         <div id="chatMessages" class="chat-messages"></div>
-        <input type="text" id="chatInput" placeholder="Press Enter to chat... (/start to begin)" />
+        <input type="text" id="chatInput" placeholder="Press enter to chat" />
       </div>
     </div>
 

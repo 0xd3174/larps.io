@@ -4,11 +4,14 @@ export interface Player {
     isHost: boolean;
     x: number;
     y: number;
+    role: string;
+    health: number;
 }
 
 export interface RoomData {
     id: string | null;
     state: string;
+    timeLeft: number;
     players: Player[];
 }
 

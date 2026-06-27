@@ -54,13 +54,26 @@ function drawPlayer(p: Player) {
     const x = isMe ? me.x : p.x;
     const y = isMe ? me.y : p.y;
     
+    let color = isMe ? '#3b82f6' : '#10b981';
+    if (roomData.state === 'playing') {
+        if (p.role === 'seeker') color = '#ef4444';
+        if (p.role === 'hider') color = '#10b981';
+    }
+
     ctx.beginPath();
     ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fillStyle = isMe ? '#3b82f6' : '#10b981';
+    ctx.fillStyle = color;
     ctx.fill();
     ctx.lineWidth = 3;
-    ctx.strokeStyle = isMe ? '#60a5fa' : '#34d399';
+    ctx.strokeStyle = isMe ? '#fff' : (p.role === 'seeker' ? '#f87171' : '#34d399');
     ctx.stroke();
+
+    if (roomData.state === 'playing' && p.role === 'hider' && p.health < 100) {
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(x - 20, y - 35, 40, 5);
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(x - 20, y - 35, 40 * (p.health / 100), 5);
+    }
 
     if (p.isHost) {
         ctx.fillStyle = '#fbbf24'; 
@@ -76,18 +89,5 @@ function drawPlayer(p: Player) {
 }
 
 export function drawMenuBackground() {
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const t = Date.now() / 2000;
-    for(let i=0; i<15; i++) {
-        ctx.beginPath();
-        ctx.arc(
-            canvas.width/2 + Math.cos(t + i*0.5)*300, 
-            canvas.height/2 + Math.sin(t*0.8 + i*0.5)*300, 
-            30 + i*5, 0, Math.PI*2
-        );
-        ctx.fillStyle = `rgba(59, 130, 246, ${0.03 - i*0.001})`;
-        ctx.fill();
-    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }

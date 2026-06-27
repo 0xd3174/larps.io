@@ -1,4 +1,4 @@
-import { me, stateContext } from './state';
+import { me, roomData, stateContext } from './state';
 import { createRoom, fetchMyRoom, joinRoom, sendChat } from './network';
 import { keys } from './input';
 
@@ -92,8 +92,15 @@ export function updateInGameUI(roomId: string, state: string = 'lobby', isHost: 
     mainMenu.classList.add('hidden');
     inGameUI.classList.remove('hidden');
     roomInfo.innerText = `Room: ${roomId}`;
-    gameStateUI.innerText = `Status: ${state}`;
     playerRoleUI.innerText = isHost ? `Role: Host` : `Role: Player`;
+
+    if (state === 'playing' && roomData.timeLeft !== undefined) {
+        const minutes = Math.floor(roomData.timeLeft / 60);
+        const seconds = Math.floor(roomData.timeLeft % 60).toString().padStart(2, '0');
+        gameStateUI.innerText = `${minutes}:${seconds}`;
+    } else {
+        gameStateUI.innerText = `Lobby`;
+    }
 }
 
 export function showMainMenu(errorText = '') {

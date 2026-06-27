@@ -57,6 +57,7 @@ export function joinRoom(roomId: string, nick: string) {
 function handleServerMessage(msg: any) {
     if (msg.type === 'state') {
         roomData.state = msg.roomState;
+        roomData.timeLeft = msg.timeLeft || 0;
         roomData.players = msg.players;
         
         const myData = roomData.players.find((p: Player) => p.nickname === me.nickname); 

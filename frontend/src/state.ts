@@ -3,6 +3,7 @@ import { RoomData, Me } from './types';
 export const roomData: RoomData = {
     id: null,
     state: 'lobby',
+    timeLeft: 0,
     players: []
 };
 

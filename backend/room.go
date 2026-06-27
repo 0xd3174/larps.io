@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -108,6 +109,8 @@ func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request, roomID, nickna
 		Send:     make(chan []byte, 256),
 		IP:       getIP(r),
 		Nickname: nickname,
+		Role:     "lobby",
+		Health:   100,
 	}
 
 	client.Room.Register <- client
@@ -120,6 +123,7 @@ type Room struct {
 	ID         string
 	HostIP     string
 	State      string // "lobby", "playing"
+	TimeLeft   float64
 	Clients    map[*Client]bool
 	Broadcast  chan []byte
 	Register   chan *Client
@@ -128,8 +132,82 @@ type Room struct {
 }
 
 func (r *Room) Run() {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+
 	for {
 		select {
+		case <-ticker.C:
+			if r.State == "playing" {
+				r.TimeLeft -= 0.1
+				
+				hidersCount := 0
+				seekersCount := 0
+
+				for c := range r.Clients {
+					if c.Role == "hider" {
+						hidersCount++
+					} else if c.Role == "seeker" {
+						seekersCount++
+					}
+				}
+
+				for c1 := range r.Clients {
+					if c1.Role != "seeker" {
+						continue
+					}
+					for c2 := range r.Clients {
+						if c2.Role != "hider" {
+							continue
+						}
+						dx := c1.X - c2.X
+						dy := c1.Y - c2.Y
+						distSq := dx*dx + dy*dy
+						
+						if distSq < 1600 {
+							c2.Health -= 10
+							if c2.Health <= 0 {
+								c2.Role = "seeker"
+								c2.Health = 100
+								sysMsg, _ := json.Marshal(map[string]interface{}{
+									"type": "chat",
+									"sender": "SERVER",
+									"text": c2.Nickname + " was captured and is now a seeker!",
+								})
+								r.broadcastRaw(sysMsg)
+							}
+						} else {
+							if c2.Health < 100 {
+								c2.Health += 2
+								if c2.Health > 100 {
+									c2.Health = 100
+								}
+							}
+						}
+					}
+				}
+
+				if r.TimeLeft <= 0 {
+					r.State = "lobby"
+					sysMsg, _ := json.Marshal(map[string]interface{}{
+						"type": "chat",
+						"sender": "SERVER",
+						"text": "Time's up! Hiders win!",
+					})
+					r.broadcastRaw(sysMsg)
+				} else if hidersCount == 0 && seekersCount > 0 {
+					r.State = "lobby"
+					sysMsg, _ := json.Marshal(map[string]interface{}{
+						"type": "chat",
+						"sender": "SERVER",
+						"text": "All hiders captured! Seekers win!",
+					})
+					r.broadcastRaw(sysMsg)
+				}
+				
+				r.broadcastState()
+			}
+
 		case client := <-r.Register:
 			r.Clients[client] = true
 			r.broadcastState()
@@ -178,15 +256,42 @@ func (r *Room) Run() {
 					cleanMessage, _ := json.Marshal(msg)
 
 					if text == "/start" && senderIP == r.HostIP && r.State == "lobby" {
+						var clients []*Client
+						for c := range r.Clients {
+							clients = append(clients, c)
+						}
+						
+						if len(clients) < 2 {
+							sysMsg, _ := json.Marshal(map[string]interface{}{
+								"type": "chat",
+								"sender": "SERVER",
+								"text": "Need at least 2 players to start.",
+							})
+							r.broadcastRaw(sysMsg)
+							continue
+						}
+
+						for _, c := range clients {
+							c.Role = "hider"
+							c.Health = 100
+						}
+
+						b := make([]byte, 1)
+						rand.Read(b)
+						seekerIdx := int(b[0]) % len(clients)
+						clients[seekerIdx].Role = "seeker"
+
 						r.State = "playing"
+						r.TimeLeft = 120 // 2 minutes round
+
 						sysMsg, _ := json.Marshal(map[string]interface{}{
 							"type": "chat",
 							"sender": "SERVER",
-							"text": "Game Started!",
+							"text": "Game Started! " + clients[seekerIdx].Nickname + " is the Seeker!",
 						})
 						r.broadcastRaw(sysMsg)
 						r.broadcastState()
-						continue // Don't broadcast the "/start" as a normal chat message
+						continue
 					}
 					
 					r.broadcastRaw(cleanMessage)
@@ -211,12 +316,15 @@ func (r *Room) broadcastState() {
 			"isHost": c.IP == r.HostIP,
 			"x": c.X,
 			"y": c.Y,
+			"role": c.Role,
+			"health": c.Health,
 		})
 	}
 
 	stateMsg, _ := json.Marshal(map[string]interface{}{
 		"type": "state",
 		"roomState": r.State,
+		"timeLeft": r.TimeLeft,
 		"players": players,
 	})
 	r.broadcastRaw(stateMsg)
@@ -240,6 +348,8 @@ type Client struct {
 	Send     chan []byte
 	IP       string
 	Nickname string
+	Role     string
+	Health   float64
 	X, Y     float64
 }
 
