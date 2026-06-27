@@ -1,6 +1,6 @@
 import { me } from './state';
 import { sendMove } from './network';
-import { MAP_SIZE } from './state';
+import { MAP_WIDTH, MAP_HEIGHT } from './state';
 
 export const keys: Record<string, boolean> = {
     w: false, a: false, s: false, d: false,
@@ -30,8 +30,8 @@ export function updateInput(dt: number, isChatFocused: boolean) {
     if (me.vx !== 0 || me.vy !== 0) {
         me.x += me.vx * dt;
         me.y += me.vy * dt;
-        me.x = Math.max(0, Math.min(me.x, MAP_SIZE));
-        me.y = Math.max(0, Math.min(me.y, MAP_SIZE));
+        me.x = Math.max(0, Math.min(me.x, MAP_WIDTH));
+        me.y = Math.max(0, Math.min(me.y, MAP_HEIGHT));
         
         sendMove(me.x, me.y);
     }

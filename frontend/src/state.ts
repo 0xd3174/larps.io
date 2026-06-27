@@ -21,4 +21,10 @@ export const stateContext = {
     ws: null as WebSocket | null
 };
 
-export const MAP_SIZE = 2000;
+export let MAP_WIDTH = 2000;
+export let MAP_HEIGHT = 2000;
+
+export function setMapSize(w: number, h: number) {
+    MAP_WIDTH = w;
+    MAP_HEIGHT = h;
+}

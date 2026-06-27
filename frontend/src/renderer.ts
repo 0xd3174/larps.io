@@ -1,4 +1,5 @@
-import { me, roomData, MAP_SIZE } from './state';
+import { me, roomData, MAP_WIDTH, MAP_HEIGHT } from './state';
+import { mapData, tilesetImage } from './map';
 import { Player } from './types';
 
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -28,25 +29,52 @@ export function draw() {
 }
 
 function drawGrid() {
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
+    if (mapData && tilesetImage) {
+        const tw = mapData.tilewidth;
+        const th = mapData.tileheight;
+        const columns = Math.floor(mapData.tilesets[0].imagewidth / tw);
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-    ctx.lineWidth = 2;
-    const step = 50;
-    
-    ctx.beginPath();
-    for (let x = 0; x <= MAP_SIZE; x += step) {
-        ctx.moveTo(x, 0); ctx.lineTo(x, MAP_SIZE);
-    }
-    for (let y = 0; y <= MAP_SIZE; y += step) {
-        ctx.moveTo(0, y); ctx.lineTo(MAP_SIZE, y);
-    }
-    ctx.stroke();
+        for (const layer of mapData.layers) {
+            if (layer.type !== 'tilelayer') continue;
+            for (let i = 0; i < layer.data.length; i++) {
+                const gid = layer.data[i];
+                if (gid === 0) continue; 
+                const tileId = gid - 1;
+                
+                const sx = (tileId % columns) * tw;
+                const sy = Math.floor(tileId / columns) * th;
+                
+                const dx = (i % mapData.width) * tw;
+                const dy = Math.floor(i / mapData.width) * th;
 
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(0, 0, MAP_SIZE, MAP_SIZE);
+                ctx.drawImage(tilesetImage, sx, sy, tw, th, dx, dy, tw, th);
+            }
+        }
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(0, 0, mapData.width * tw, mapData.height * th);
+    } else {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        ctx.lineWidth = 2;
+        const step = 50;
+        
+        ctx.beginPath();
+        for (let x = 0; x <= MAP_WIDTH; x += step) {
+            ctx.moveTo(x, 0); ctx.lineTo(x, MAP_HEIGHT);
+        }
+        for (let y = 0; y <= MAP_HEIGHT; y += step) {
+            ctx.moveTo(0, y); ctx.lineTo(MAP_WIDTH, y);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    }
 }
 
 function drawPlayer(p: Player) {

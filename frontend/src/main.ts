@@ -3,14 +3,17 @@ import { setupUI, isMainMenuVisible, isChatFocused } from './ui';
 import { resizeCanvas, draw, drawMenuBackground } from './renderer';
 import { updateInput } from './input';
 import { roomData, stateContext } from './state';
+import { loadMap } from './map';
 
 let lastTime = 0;
 
 function init() {
-    setupUI();
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    requestAnimationFrame(gameLoop);
+    loadMap().then(() => {
+        setupUI();
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        requestAnimationFrame(gameLoop);
+    });
 }
 
 function gameLoop(timestamp: number) {
