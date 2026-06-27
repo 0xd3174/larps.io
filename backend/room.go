@@ -132,14 +132,14 @@ type Room struct {
 }
 
 func (r *Room) Run() {
-	ticker := time.NewTicker(100 * time.Millisecond)
+	ticker := time.NewTicker(time.Second / 60)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
 			if r.State == "playing" {
-				r.TimeLeft -= 0.1
+				r.TimeLeft -= 1.0 / 60.0
 				
 				hidersCount := 0
 				seekersCount := 0
@@ -165,7 +165,7 @@ func (r *Room) Run() {
 						distSq := dx*dx + dy*dy
 						
 						if distSq < 1600 {
-							c2.Health -= 10
+							c2.Health -= 100.0 / 60.0
 							if c2.Health <= 0 {
 								c2.Role = "seeker"
 								c2.Health = 100
@@ -175,13 +175,6 @@ func (r *Room) Run() {
 									"text": c2.Nickname + " was captured and is now a seeker!",
 								})
 								r.broadcastRaw(sysMsg)
-							}
-						} else {
-							if c2.Health < 100 {
-								c2.Health += 2
-								if c2.Health > 100 {
-									c2.Health = 100
-								}
 							}
 						}
 					}
