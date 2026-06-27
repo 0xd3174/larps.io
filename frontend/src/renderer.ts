@@ -15,8 +15,11 @@ export function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    const camX = canvas.width / 2 - me.x;
-    const camY = canvas.height / 2 - me.y;
+    ctx.imageSmoothingEnabled = false; // Prevent tile bleeding
+    
+    // Round camera position to fix sub-pixel black gaps between tiles
+    const camX = Math.round(canvas.width / 2 - me.x);
+    const camY = Math.round(canvas.height / 2 - me.y);
     ctx.translate(camX, camY);
 
     drawGrid();
@@ -38,12 +41,12 @@ function drawGrid() {
             if (layer.type !== 'tilelayer') continue;
             for (let i = 0; i < layer.data.length; i++) {
                 const gid = layer.data[i];
-                if (gid === 0) continue; 
+                if (gid === 0) continue;
                 const tileId = gid - 1;
-                
+
                 const sx = (tileId % columns) * tw;
                 const sy = Math.floor(tileId / columns) * th;
-                
+
                 const dx = (i % mapData.width) * tw;
                 const dy = Math.floor(i / mapData.width) * th;
 
@@ -61,7 +64,7 @@ function drawGrid() {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
         ctx.lineWidth = 2;
         const step = 50;
-        
+
         ctx.beginPath();
         for (let x = 0; x <= MAP_WIDTH; x += step) {
             ctx.moveTo(x, 0); ctx.lineTo(x, MAP_HEIGHT);
@@ -81,7 +84,7 @@ function drawPlayer(p: Player) {
     const isMe = p.nickname === me.nickname;
     const x = isMe ? me.x : p.x;
     const y = isMe ? me.y : p.y;
-    
+
     let strokeColor = '#aaa';
     if (roomData.state === 'playing') {
         if (p.role === 'seeker') strokeColor = '#ef4444'; // Red
@@ -92,7 +95,7 @@ function drawPlayer(p: Player) {
 
     ctx.beginPath();
     ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = strokeColor;
     ctx.stroke();
 
@@ -104,7 +107,7 @@ function drawPlayer(p: Player) {
     }
 
     if (p.isHost) {
-        ctx.fillStyle = '#fbbf24'; 
+        ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
         ctx.arc(x, y - 30, 5, 0, Math.PI * 2);
         ctx.fill();
