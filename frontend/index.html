@@ -3,10 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Template</title>
+    <title>Seekers vs Hiders</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Main Menu Overlay -->
+    <div id="mainMenu" class="overlay">
+      <div class="glass-panel">
+        <h1>Seekers vs Hiders</h1>
+        <div class="input-group">
+          <label for="nickname">Nickname</label>
+          <input type="text" id="nickname" placeholder="Enter your name..." />
+        </div>
+        
+        <div class="input-group">
+          <label for="roomId">Room ID (optional)</label>
+          <input type="text" id="roomId" placeholder="Enter code to join..." />
+        </div>
+
+        <div class="button-group">
+          <button id="btnJoin" class="btn primary">Join Room</button>
+          <button id="btnCreate" class="btn secondary">Create New Room</button>
+          <button id="btnMyRoom" class="btn outline">Go to My Room</button>
+        </div>
+        <p id="menuError" class="error-msg"></p>
+      </div>
+    </div>
+
+    <!-- In-Game UI -->
+    <div id="inGameUI" class="overlay hidden">
+      <!-- Top info bar -->
+      <div class="top-bar glass-panel">
+        <span id="roomInfo">Room: ---</span>
+        <span id="gameState">Status: Lobby</span>
+        <span id="playerRole">Role: ---</span>
+      </div>
+
+      <!-- Chat UI (Bottom Left) -->
+      <div id="chatBox" class="chat-container glass-panel">
+        <div id="chatMessages" class="chat-messages"></div>
+        <input type="text" id="chatInput" placeholder="Press Enter to chat... (/start to begin)" />
+      </div>
+    </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
