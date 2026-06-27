@@ -82,24 +82,24 @@ function drawPlayer(p: Player) {
     const x = isMe ? me.x : p.x;
     const y = isMe ? me.y : p.y;
     
-    let color = isMe ? '#3b82f6' : '#10b981';
+    let strokeColor = '#aaa';
     if (roomData.state === 'playing') {
-        if (p.role === 'seeker') color = '#ef4444';
-        if (p.role === 'hider') color = '#10b981';
+        if (p.role === 'seeker') strokeColor = '#ef4444'; // Red
+        if (p.role === 'hider') strokeColor = '#3b82f6'; // Blue
+    } else {
+        strokeColor = isMe ? '#3b82f6' : '#aaa';
     }
 
     ctx.beginPath();
     ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = isMe ? '#fff' : (p.role === 'seeker' ? '#f87171' : '#34d399');
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = strokeColor;
     ctx.stroke();
 
     if (roomData.state === 'playing' && p.role === 'hider' && p.health < 100) {
         ctx.fillStyle = '#ef4444';
         ctx.fillRect(x - 20, y - 35, 40, 5);
-        ctx.fillStyle = '#10b981';
+        ctx.fillStyle = '#3b82f6';
         ctx.fillRect(x - 20, y - 35, 40 * (p.health / 100), 5);
     }
 
@@ -111,7 +111,7 @@ function drawPlayer(p: Player) {
     }
 
     ctx.fillStyle = '#fff';
-    ctx.font = '14px Outfit';
+    ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(p.nickname, x, y + 40);
 }
