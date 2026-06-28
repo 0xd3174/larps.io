@@ -101,12 +101,15 @@ export class UIManager {
     public appendChat(sender: string, text: string, isSystem: boolean = false) {
         const messages = document.getElementById('chatMessages')!;
         const el = document.createElement('div');
-        el.className = 'mb-1';
-        if (isSystem) {
-            el.innerHTML = `<span class="text-yellow-400 font-bold">[${sender}]</span> <span class="text-yellow-200">${text}</span>`;
-        } else {
-            el.innerHTML = `<span class="text-blue-400 font-bold">${sender}:</span> <span class="text-white">${text}</span>`;
-        }
+        el.className = isSystem ? 'chat-msg server' : 'chat-msg';
+
+        const senderSpan = document.createElement('strong');
+        senderSpan.textContent = isSystem ? `[${sender}]` : `${sender}:`;
+
+        const textNode = document.createTextNode(' ' + text);
+
+        el.appendChild(senderSpan);
+        el.appendChild(textNode);
         messages.appendChild(el);
         messages.scrollTop = messages.scrollHeight;
     }
