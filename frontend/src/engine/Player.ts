@@ -8,6 +8,8 @@ export class Player {
     public role: string = 'waiting';
     public health: number = 100;
     public isHost: boolean = false;
+    public isDead: boolean = false;
+    public networkId: number = 0;
     public isLocal: boolean;
 
     constructor(id: string, nickname: string, isLocal: boolean = false) {
@@ -20,7 +22,8 @@ export class Player {
         this.id = data.id;
         this.role = data.role;
         this.health = data.health;
-        this.isHost = data.isHost;
+        if (data.isHost !== undefined) this.isHost = data.isHost;
+        if (data.networkId !== undefined) this.networkId = data.networkId;
         
         this.x = data.x;
         this.y = data.y;

@@ -37,6 +37,7 @@ export class NetworkManager {
         const wsUrl = `${protocol}//${host}/ws?room=${roomId}&nickname=${encodeURIComponent(nickname)}`;
 
         this.ws = new WebSocket(wsUrl);
+        this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
             this.game.roomId = roomId;
@@ -46,6 +47,10 @@ export class NetworkManager {
         };
 
         this.ws.onmessage = (e) => {
+            if (e.data instanceof ArrayBuffer) {
+                this.game.handleBinaryMessage(e.data);
+                return;
+            }
             const msg = JSON.parse(e.data) as ServerMessage;
             this.game.handleServerMessage(msg);
         };

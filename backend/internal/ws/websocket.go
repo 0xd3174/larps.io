@@ -97,6 +97,7 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 
 	client := &models.Client{
 		ID:       generateID(),
+		NetworkID: mrand.Uint32(),
 		Room:     room,
 		Conn:     conn,
 		Send:     make(chan []byte, 256),
@@ -116,6 +117,7 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 	initMsg, _ := json.Marshal(map[string]interface{}{
 		"type": "init",
 		"id":   client.ID,
+		"networkId": client.NetworkID,
 	})
 	client.Send <- initMsg
 }
@@ -161,7 +163,11 @@ func WritePump(c *models.Client) {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			msgType := websocket.TextMessage
+			if len(message) > 0 && message[0] != '{' && message[0] != '[' {
+				msgType = websocket.BinaryMessage
+			}
+			if err := c.Conn.WriteMessage(msgType, message); err != nil {
 				return
 			}
 		case <-ticker.C:

@@ -71,6 +71,7 @@ type Client struct {
 	ID       string
 	Room     *Room
 	Conn     *websocket.Conn
+	NetworkID uint32
 	Send     chan []byte
 	IP       string
 	Nickname string

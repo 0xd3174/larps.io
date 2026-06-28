@@ -47,6 +47,7 @@ export class Game {
         if (msg.type === 'init') {
             if (this.localPlayer) {
                 this.localPlayer.id = msg.id;
+                this.localPlayer.networkId = msg.networkId;
             }
         } else if (msg.type === 'state') {
             this.state = msg.roomState;
@@ -80,6 +81,38 @@ export class Game {
 
         } else if (msg.type === 'chat') {
             this.ui.appendChat(msg.sender, msg.text, msg.sender === 'SERVER');
+        }
+    }
+
+    public handleBinaryMessage(buffer: ArrayBuffer) {
+        const view = new DataView(buffer);
+        if (view.byteLength < 4) return;
+
+        const type = view.getUint8(0);
+        if (type === 1) { // Delta update
+            this.timeLeft = view.getUint16(1, true);
+            this.ui.updateHUD(this.state, this.timeLeft);
+
+            const playerCount = view.getUint8(3);
+            let offset = 4;
+
+            for (let i = 0; i < playerCount; i++) {
+                const netId = view.getUint32(offset, true);
+                const x = view.getFloat32(offset + 4, true);
+                const y = view.getFloat32(offset + 8, true);
+                const health = view.getUint8(offset + 12);
+                const roleVal = view.getUint8(offset + 13);
+                const role = roleVal === 1 ? 'hider' : (roleVal === 2 ? 'seeker' : 'lobby');
+
+                const player = this.players.find(p => p.networkId === netId);
+                if (player) {
+                    player.x = x;
+                    player.y = y;
+                    player.health = health;
+                    player.role = role;
+                }
+                offset += 14;
+            }
         }
     }
 

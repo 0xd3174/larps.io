@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"math"
+	"encoding/binary"
 	"math/rand"
 	"time"
 
@@ -106,6 +107,15 @@ func RunRoom(r *models.Room, a *app.App) {
 	lastTime := time.Now()
 	var ticks int
 	var tickTimer float64
+	var networkTimer float64
+
+	type clientState struct {
+		X, Y   float64
+		Health float64
+		Role   string
+	}
+	prevStates := make(map[uint32]clientState)
+	var lastTimeLeft uint16
 
 	for {
 		select {
@@ -122,6 +132,7 @@ func RunRoom(r *models.Room, a *app.App) {
 
 			ticks++
 			tickTimer += dt
+			networkTimer += dt
 			if tickTimer >= 1.0 {
 				if ticks < 55 {
 					log.Printf("[Room %s] Performance Warning: TPS dropped to %d (Expected: 60)", r.ID, ticks)
@@ -249,7 +260,46 @@ func RunRoom(r *models.Room, a *app.App) {
 				}
 			}
 
-			BroadcastState(r)
+			if networkTimer >= 1.0/60.0 {
+				networkTimer -= 1.0 / 60.0
+
+				currentTimeLeft := uint16(r.TimeLeft)
+				if r.TimeLeft < 0 {
+					currentTimeLeft = 0
+				}
+
+				var deltas []byte
+				for c := range r.Clients {
+					prev, ok := prevStates[c.NetworkID]
+					if !ok || math.Abs(c.X-prev.X) > 0.1 || math.Abs(c.Y-prev.Y) > 0.1 || c.Health != prev.Health || c.Role != prev.Role {
+						var roleByte uint8 = 0
+						if c.Role == "hider" {
+							roleByte = 1
+						} else if c.Role == "seeker" {
+							roleByte = 2
+						}
+
+						buf := make([]byte, 14)
+						binary.LittleEndian.PutUint32(buf[0:4], c.NetworkID)
+						binary.LittleEndian.PutUint32(buf[4:8], math.Float32bits(float32(c.X)))
+						binary.LittleEndian.PutUint32(buf[8:12], math.Float32bits(float32(c.Y)))
+						buf[12] = uint8(c.Health)
+						buf[13] = roleByte
+
+						deltas = append(deltas, buf...)
+						prevStates[c.NetworkID] = clientState{X: c.X, Y: c.Y, Health: c.Health, Role: c.Role}
+					}
+				}
+
+				if len(deltas) > 0 || currentTimeLeft != lastTimeLeft {
+					lastTimeLeft = currentTimeLeft
+					header := make([]byte, 4)
+					header[0] = 0x01
+					binary.LittleEndian.PutUint16(header[1:3], currentTimeLeft)
+					header[3] = uint8(len(deltas) / 14)
+					BroadcastRaw(r, append(header, deltas...))
+				}
+			}
 
 		case client := <-r.Register:
 			r.Clients[client] = true
@@ -337,6 +387,7 @@ func BroadcastState(r *models.Room) {
 	for c := range r.Clients {
 		players = append(players, map[string]interface{}{
 			"id":       c.ID,
+			"networkId": c.NetworkID,
 			"nickname": c.Nickname,
 			"isHost":   c.IP == r.HostIP,
 			"x":        c.X,
