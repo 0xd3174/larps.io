@@ -27,6 +27,7 @@ COPY shared /app/shared
 ENV PORT=8080
 ENV STATIC_DIR=/app/public
 ENV MAP_PATH=/app/shared/map.json
+ENV CONFIG_PATH=/app/shared/config.json
 
 EXPOSE 8080
 
