@@ -1,10 +1,11 @@
 package ws
 
 import (
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"log"
-	"math/rand"
+	mrand "math/rand"
 	"net"
 	"net/http"
 	"strings"
@@ -79,12 +80,12 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 	hiderSpawns := game.GetSpawnPoints(a.GameMap, "hider")
 	var startX, startY float64
 	if len(hiderSpawns) > 0 {
-		spawn := hiderSpawns[rand.Intn(len(hiderSpawns))]
+		spawn := hiderSpawns[mrand.Intn(len(hiderSpawns))]
 		startX = spawn.X
 		startY = spawn.Y
 	} else {
-		startX = float64(100 + rand.Intn(100))
-		startY = float64(100 + rand.Intn(100))
+		startX = float64(100 + mrand.Intn(100))
+		startY = float64(100 + mrand.Intn(100))
 	}
 
 	client := &models.Client{

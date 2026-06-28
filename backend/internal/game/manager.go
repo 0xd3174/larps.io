@@ -1,8 +1,8 @@
 package game
 
 import (
+	"crypto/rand"
 	"encoding/hex"
-	"math/rand"
 
 	"game-backend/internal/app"
 	"game-backend/internal/models"
