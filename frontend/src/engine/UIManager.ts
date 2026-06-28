@@ -10,7 +10,11 @@ export class UIManager {
 
     private bindEvents() {
         document.getElementById('btnCreate')!.addEventListener('click', async () => {
-            const roomId = await this.game.network.createRoom();
+            const initialSeekersInput = document.getElementById('initialSeekers') as HTMLInputElement;
+            const roundDurationInput = document.getElementById('roundDuration') as HTMLInputElement;
+            const seekers = parseInt(initialSeekersInput?.value) || 1;
+            const duration = parseInt(roundDurationInput?.value) || 120;
+            const roomId = await this.game.network.createRoom(seekers, duration);
             if (roomId) this.joinLobby(roomId);
         });
 

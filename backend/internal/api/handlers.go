@@ -8,6 +8,7 @@ import (
 
 	"game-backend/internal/app"
 	"game-backend/internal/game"
+	"game-backend/internal/models"
 	"game-backend/internal/ws"
 )
 
@@ -18,8 +19,17 @@ func SetupRoutes(mux *http.ServeMux, a *app.App) {
 			return
 		}
 
+		var settings models.RoomSettings
+		// Set defaults
+		settings.InitialSeekers = 1
+		settings.RoundDuration = 120
+		
+		if r.Body != nil {
+			json.NewDecoder(r.Body).Decode(&settings)
+		}
+
 		ip := ws.GetIP(r)
-		roomID, err := game.CreateRoom(a, ip)
+		roomID, err := game.CreateRoom(a, ip, settings)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

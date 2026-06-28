@@ -9,9 +9,13 @@ export class NetworkManager {
         this.game = game;
     }
 
-    async createRoom(): Promise<string | null> {
+    async createRoom(seekers: number, duration: number): Promise<string | null> {
         try {
-            const res = await fetch('/api/rooms', { method: 'POST' });
+            const res = await fetch('/api/rooms', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seekers, duration })
+            });
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
             return data.roomId;

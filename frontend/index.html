@@ -16,8 +16,14 @@
 
         <div class="form-container">
           <div class="main-action">
-            <button id="btnCreate" class="btn primary-btn">Create Room</button>
-            <button id="btnMyRoom" class="btn primary-btn">My Room</button>
+            <div class="settings-box" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <label style="color: #d1d1d1; font-size: 14px;">Seekers: <input type="number" id="initialSeekers" value="1" min="1" max="10" style="width: 50px; padding: 2px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;" /></label>
+              <label style="color: #d1d1d1; font-size: 14px;">Time (s): <input type="number" id="roundDuration" value="120" min="30" max="600" style="width: 60px; padding: 2px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;" /></label>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button id="btnCreate" class="btn primary-btn">Create Room</button>
+              <button id="btnMyRoom" class="btn primary-btn">My Room</button>
+            </div>
           </div>
 
           <div class="login-box">

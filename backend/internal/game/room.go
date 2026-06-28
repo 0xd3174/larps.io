@@ -33,15 +33,31 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 		return
 	}
 
-	seekerIdx := rand.Intn(len(clients))
+	numSeekers := r.Settings.InitialSeekers
+	if numSeekers < 1 {
+		numSeekers = 1
+	}
+	if numSeekers >= len(clients) {
+		numSeekers = len(clients) - 1
+		if numSeekers < 1 {
+			numSeekers = 1
+		}
+	}
+
+	rand.Shuffle(len(clients), func(i, j int) {
+		clients[i], clients[j] = clients[j], clients[i]
+	})
 
 	hiderSpawns := GetSpawnPoints(gameMap, "hider")
 	seekerSpawns := GetSpawnPoints(gameMap, "seeker")
 
+	var seekerNames string
+
 	for i, c := range clients {
 		c.Health = 100
-		if i == seekerIdx {
+		if i < numSeekers {
 			c.Role = "seeker"
+			seekerNames += c.Nickname + ", "
 			if len(seekerSpawns) > 0 {
 				spawn := seekerSpawns[rand.Intn(len(seekerSpawns))]
 				c.X = spawn.X
@@ -64,12 +80,19 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 	}
 
 	r.State = "playing"
-	r.TimeLeft = 120 // 2 minutes round
+	r.TimeLeft = float64(r.Settings.RoundDuration)
+	if r.TimeLeft <= 0 {
+		r.TimeLeft = 120 // fallback
+	}
+
+	if len(seekerNames) > 2 {
+		seekerNames = seekerNames[:len(seekerNames)-2]
+	}
 
 	sysMsg, _ := json.Marshal(map[string]interface{}{
 		"type":   "chat",
 		"sender": "SERVER",
-		"text":   "Game Started! " + clients[seekerIdx].Nickname + " is the Seeker!",
+		"text":   "Game Started! Seekers: " + seekerNames,
 	})
 	BroadcastRaw(r, sysMsg)
 	BroadcastState(r)

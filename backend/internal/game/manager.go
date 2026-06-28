@@ -2,19 +2,19 @@ package game
 
 import (
 	"encoding/hex"
-	"errors"
 	"math/rand"
 
 	"game-backend/internal/app"
 	"game-backend/internal/models"
 )
 
-func CreateRoom(a *app.App, ip string) (string, error) {
+func CreateRoom(a *app.App, ip string, settings models.RoomSettings) (string, error) {
 	a.Manager.Mu.Lock()
 	defer a.Manager.Mu.Unlock()
 
-	if _, exists := a.Manager.IpRooms[ip]; exists {
-		return "", errors.New("you already have an active room")
+	if oldRoomID, exists := a.Manager.IpRooms[ip]; exists {
+		delete(a.Manager.Rooms, oldRoomID)
+		delete(a.Manager.IpRooms, ip)
 	}
 
 	bytes := make([]byte, 3)
@@ -30,6 +30,7 @@ func CreateRoom(a *app.App, ip string) (string, error) {
 		Register:   make(chan *models.Client),
 		Unregister: make(chan *models.Client),
 		Manager:    a.Manager,
+		Settings:   settings,
 	}
 
 	a.Manager.Rooms[roomID] = room

@@ -55,6 +55,12 @@ type Room struct {
 	Unregister chan *Client
 	Manager    *Manager
 	Mu         sync.Mutex
+	Settings   RoomSettings
+}
+
+type RoomSettings struct {
+	InitialSeekers int `json:"seekers"`
+	RoundDuration  int `json:"duration"`
 }
 
 type Client struct {
