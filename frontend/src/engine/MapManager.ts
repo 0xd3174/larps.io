@@ -9,7 +9,7 @@ export class MapManager {
 
     async load() {
         try {
-            const res = await fetch('/map.json');
+            const res = await fetch('/api/map');
             this.mapData = await res.json();
             
             if (this.mapData.tilesets && this.mapData.tilesets.length > 0) {

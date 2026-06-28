@@ -1,4 +1,4 @@
-import SharedConfig from '../../shared.json';
+import SharedConfig from '../../shared/config.json';
 
 export const CONFIG = {
     PLAYER_RADIUS: SharedConfig.PLAYER_RADIUS,

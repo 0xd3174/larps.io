@@ -41,16 +41,18 @@ export class Renderer {
         const camY = Math.round(this.canvas.height / 2) - Math.round(localPlayer.y);
         this.ctx.translate(camX, camY);
 
-        this.drawGrid(mapManager);
+        this.drawLayers(mapManager, false);
 
         for (const p of players) {
             this.drawPlayer(p, gameState);
         }
 
+        this.drawLayers(mapManager, true);
+
         this.ctx.restore();
     }
 
-    private drawGrid(mapManager: MapManager) {
+    private drawLayers(mapManager: MapManager, drawFront: boolean) {
         const { mapData, tilesetImage } = mapManager;
 
         if (mapData && tilesetImage && tilesetImage.complete && tilesetImage.naturalWidth > 0) {
@@ -62,6 +64,11 @@ export class Renderer {
 
             for (const layer of mapData.layers) {
                 if (layer.type !== 'tilelayer') continue;
+                
+                // 'Front' draws above players, everything else below
+                if (drawFront && layer.name !== 'Front') continue;
+                if (!drawFront && layer.name === 'Front') continue;
+
                 for (let i = 0; i < layer.data.length; i++) {
                     const gid = layer.data[i];
                     if (gid === 0 || gid < firstgid) continue;
@@ -81,10 +88,12 @@ export class Renderer {
                 }
             }
 
-            this.ctx.strokeStyle = CONFIG.COLORS.MAP_BORDER;
-            this.ctx.lineWidth = 4;
-            this.ctx.strokeRect(0, 0, mapData.width * tw, mapData.height * th);
-        } else {
+            if (!drawFront) {
+                this.ctx.strokeStyle = CONFIG.COLORS.MAP_BORDER;
+                this.ctx.lineWidth = 4;
+                this.ctx.strokeRect(0, 0, mapData.width * tw, mapData.height * th);
+            }
+        } else if (!drawFront) {
             this.ctx.fillStyle = '#1e293b';
             this.ctx.fillRect(0, 0, mapManager.width, mapManager.height);
 

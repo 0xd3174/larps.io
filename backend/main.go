@@ -18,7 +18,7 @@ func main() {
 
 	mapPath := os.Getenv("MAP_PATH")
 	if mapPath == "" {
-		mapPath = "../frontend/public/map.json"
+		mapPath = "../shared/map.json"
 	}
 
 	gameMap, err := game.LoadMap(mapPath)
@@ -28,10 +28,10 @@ func main() {
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		configPath = "../shared.json"
+		configPath = "../shared/config.json"
 	}
 	if err := game.LoadConfig(configPath); err != nil {
-		log.Println("Warning: Could not load shared.json. Using defaults.", err)
+		log.Println("Warning: Could not load shared/config.json. Using defaults.", err)
 	}
 
 	application := app.NewApp(gameMap)

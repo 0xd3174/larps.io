@@ -1,7 +1,7 @@
 # Stage 1: Build the frontend with Bun
 FROM oven/bun:1 AS frontend-builder
 WORKDIR /app
-COPY shared.json ./
+COPY shared/config.json ./shared/config.json
 WORKDIR /app/frontend
 COPY frontend/package.json ./
 RUN bun install
@@ -22,11 +22,11 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=backend-builder /app/backend/game-backend ./
 COPY --from=frontend-builder /app/frontend/dist ./public
-COPY shared.json /app/shared.json
+COPY shared /app/shared
 
 ENV PORT=8080
 ENV STATIC_DIR=/app/public
-ENV MAP_PATH=/app/public/map.json
+ENV MAP_PATH=/app/shared/map.json
 
 EXPOSE 8080
 

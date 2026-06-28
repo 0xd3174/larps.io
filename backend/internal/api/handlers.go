@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 
 	"game-backend/internal/app"
@@ -62,5 +63,14 @@ func SetupRoutes(mux *http.ServeMux, a *app.App) {
 		}
 
 		ws.ServeWS(a, w, r, roomID, nickname)
+	})
+
+	mux.HandleFunc("/api/map", func(w http.ResponseWriter, r *http.Request) {
+		mapPath := os.Getenv("MAP_PATH")
+		if mapPath == "" {
+			mapPath = "../shared/map.json"
+		}
+		w.Header().Set("Content-Type", "application/json")
+		http.ServeFile(w, r, mapPath)
 	})
 }
