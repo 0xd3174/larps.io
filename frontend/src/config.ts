@@ -1,13 +1,7 @@
 import SharedConfig from '../../shared.json';
 
-const PLAYER_RADIUS = SharedConfig.PLAYER_RADIUS;
-const HEALTH_BAR_HEIGHT = 5;
-const HEALTH_BAR_OFFSET_Y = -35;
 export const CONFIG = {
-    PLAYER_RADIUS,
-    HOST_INDICATOR_RADIUS: 5,
-    HEALTH_BAR_HEIGHT,
-    HEALTH_BAR_OFFSET_Y,
+    PLAYER_RADIUS: SharedConfig.PLAYER_RADIUS,
     TILE_SIZE: 64,
     COLORS: {
         BACKGROUND: '#0f172a',

@@ -1,10 +1,7 @@
 import { CONFIG } from '../config';
 import { Player } from './Player';
 import { MapManager } from './MapManager';
-
-const HEALTH_BAR_WIDTH = CONFIG.PLAYER_RADIUS * 2;
-const HOST_INDICATOR_OFFSET_X = CONFIG.PLAYER_RADIUS + 10;
-const HOST_INDICATOR_OFFSET_Y = CONFIG.HEALTH_BAR_OFFSET_Y + CONFIG.HEALTH_BAR_HEIGHT / 2;
+import * as R from './RenderConstants';
 
 export class Renderer {
     private canvas: HTMLCanvasElement;
@@ -132,9 +129,9 @@ export class Renderer {
         if (gameState === 'playing' && p.role === 'hider' && p.health < 100) {
             hpVisible = true;
             this.ctx.fillStyle = CONFIG.COLORS.SEEKER;
-            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, HEALTH_BAR_WIDTH, CONFIG.HEALTH_BAR_HEIGHT);
+            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + R.HEALTH_BAR_OFFSET_Y, R.HEALTH_BAR_WIDTH, R.HEALTH_BAR_HEIGHT);
             this.ctx.fillStyle = CONFIG.COLORS.HIDER;
-            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, HEALTH_BAR_WIDTH * (p.health / 100), CONFIG.HEALTH_BAR_HEIGHT);
+            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + R.HEALTH_BAR_OFFSET_Y, R.HEALTH_BAR_WIDTH * (p.health / 100), R.HEALTH_BAR_HEIGHT);
         }
 
         if (p.isHost) {
@@ -142,20 +139,20 @@ export class Renderer {
             this.ctx.beginPath();
 
             let hostX = x;
-            let hostY = y - 36; // Default center top
+            let hostY = y + R.HOST_INDICATOR_DEFAULT_OFFSET_Y; // Default center top
 
             if (hpVisible) {
-                hostX = x + HOST_INDICATOR_OFFSET_X;
-                hostY = y + HOST_INDICATOR_OFFSET_Y;
+                hostX = x + R.HOST_INDICATOR_OFFSET_X;
+                hostY = y + R.HOST_INDICATOR_OFFSET_Y;
             }
 
-            this.ctx.arc(hostX, hostY, CONFIG.HOST_INDICATOR_RADIUS, 0, Math.PI * 2);
+            this.ctx.arc(hostX, hostY, R.HOST_INDICATOR_RADIUS, 0, Math.PI * 2);
             this.ctx.fill();
         }
 
         this.ctx.fillStyle = CONFIG.COLORS.TEXT;
         this.ctx.font = CONFIG.FONTS.PLAYER_NAME;
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(p.nickname, x, y + 36);
+        this.ctx.fillText(p.nickname, x, y + R.PLAYER_NAME_OFFSET_Y);
     }
 }
