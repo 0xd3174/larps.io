@@ -59,7 +59,7 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 		return
 	}
 
-	hiderSpawns := game.GetSpawnPoints(a.GameMap, "Hider")
+	hiderSpawns := game.GetSpawnPoints(a.GameMap, "hider")
 	var startX, startY float64
 	if len(hiderSpawns) > 0 {
 		spawn := hiderSpawns[rand.Intn(len(hiderSpawns))]

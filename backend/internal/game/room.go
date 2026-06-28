@@ -35,8 +35,8 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 
 	seekerIdx := rand.Intn(len(clients))
 
-	hiderSpawns := GetSpawnPoints(gameMap, "Hider")
-	seekerSpawns := GetSpawnPoints(gameMap, "Seeker")
+	hiderSpawns := GetSpawnPoints(gameMap, "hider")
+	seekerSpawns := GetSpawnPoints(gameMap, "seeker")
 
 	for i, c := range clients {
 		c.Health = 100

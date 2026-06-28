@@ -11,11 +11,11 @@ export class MapManager {
         try {
             const res = await fetch('/api/map');
             this.mapData = await res.json();
-            
-            if (this.mapData.tilesets && this.mapData.tilesets.length > 0) {
+
+            if (this.mapData?.tilesets && this.mapData.tilesets.length > 0) {
                 const ts = this.mapData.tilesets[0];
                 let imagePath = ts.image;
-                
+
                 if (imagePath.includes('frontend/public/')) {
                     imagePath = imagePath.substring(imagePath.indexOf('frontend/public/') + 15);
                 } else if (imagePath.includes('public/')) {
@@ -26,7 +26,7 @@ export class MapManager {
 
                 this.tilesetImage = new Image();
                 this.tilesetImage.src = imagePath;
-                
+
                 this.width = this.mapData.width * this.mapData.tilewidth;
                 this.height = this.mapData.height * this.mapData.tileheight;
             }

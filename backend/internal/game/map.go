@@ -88,13 +88,13 @@ func CheckTeleport(gameMap *models.MapData, x, y float64) (float64, float64, boo
 			var targetX, targetY float64
 			var hasX, hasY bool
 			for _, p := range t.Properties {
-				if p.Name == "targetX" {
+				if p.Name == "target_x" {
 					if val, ok := p.Value.(float64); ok {
 						targetX = val
 						hasX = true
 					}
 				}
-				if p.Name == "targetY" {
+				if p.Name == "target_y" {
 					if val, ok := p.Value.(float64); ok {
 						targetY = val
 						hasY = true
