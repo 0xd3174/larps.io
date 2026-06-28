@@ -28,7 +28,12 @@ export interface MoveMessage {
     y: number;
 }
 
-export type ServerMessage = StateMessage | ChatMessage | MoveMessage;
+export interface InitMessage {
+    type: 'init';
+    id: string;
+}
+
+export type ServerMessage = StateMessage | ChatMessage | MoveMessage | InitMessage;
 
 export interface MapLayer {
     name: string;

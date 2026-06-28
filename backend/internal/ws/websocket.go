@@ -87,6 +87,12 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 
 	go WritePump(client)
 	go ReadPump(client)
+
+	initMsg, _ := json.Marshal(map[string]interface{}{
+		"type": "init",
+		"id":   client.ID,
+	})
+	client.Send <- initMsg
 }
 
 func ReadPump(c *models.Client) {

@@ -44,7 +44,11 @@ export class Game {
     }
 
     public handleServerMessage(msg: ServerMessage) {
-        if (msg.type === 'state') {
+        if (msg.type === 'init') {
+            if (this.localPlayer) {
+                this.localPlayer.id = msg.id;
+            }
+        } else if (msg.type === 'state') {
             this.state = msg.roomState;
             this.timeLeft = msg.timeLeft || 0;
             
@@ -55,12 +59,12 @@ export class Game {
             let myData = null;
 
             for (const pData of msg.players) {
-                if (this.localPlayer && pData.nickname === this.localPlayer.nickname) {
+                if (this.localPlayer && pData.id === this.localPlayer.id) {
                     this.localPlayer.updateFromServer(pData);
                     updatedPlayers.push(this.localPlayer);
                     myData = pData;
                 } else {
-                    let p = this.players.find(existing => existing.nickname === pData.nickname);
+                    let p = this.players.find(existing => existing.id === pData.id);
                     if (!p) {
                         p = new Player(pData.id, pData.nickname, false);
                     }
