@@ -103,10 +103,18 @@ func RunRoom(r *models.Room, a *app.App) {
 	ticker := time.NewTicker(time.Second / 60)
 	defer ticker.Stop()
 
+	lastTime := time.Now()
 	for {
 		select {
-		case <-ticker.C:
-			dt := 1.0 / 60.0
+		case t := <-ticker.C:
+			dt := t.Sub(lastTime).Seconds()
+			lastTime = t
+			
+			// Cap dt to prevent massive jumps if the server hangs briefly
+			if dt > 0.1 {
+				dt = 0.1
+			}
+
 			for c := range r.Clients {
 				var dx, dy float64
 				if c.Up {
