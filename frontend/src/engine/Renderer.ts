@@ -134,7 +134,12 @@ export class Renderer {
         if (p.isHost) {
             this.ctx.fillStyle = CONFIG.COLORS.HOST_INDICATOR;
             this.ctx.beginPath();
-            this.ctx.arc(x, y + CONFIG.HOST_INDICATOR_OFFSET_Y, CONFIG.HOST_INDICATOR_RADIUS, 0, Math.PI * 2);
+            this.ctx.arc(
+                x + CONFIG.HOST_INDICATOR_OFFSET_X, 
+                y + CONFIG.HOST_INDICATOR_OFFSET_Y, 
+                CONFIG.HOST_INDICATOR_RADIUS, 
+                0, Math.PI * 2
+            );
             this.ctx.fill();
         }
 
