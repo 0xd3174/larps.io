@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -104,11 +105,24 @@ func RunRoom(r *models.Room, a *app.App) {
 	defer ticker.Stop()
 
 	lastTime := time.Now()
+	var ticks int
+	var tickTimer float64
+
 	for {
 		select {
 		case t := <-ticker.C:
 			dt := t.Sub(lastTime).Seconds()
 			lastTime = t
+
+			ticks++
+			tickTimer += dt
+			if tickTimer >= 1.0 {
+				if ticks < 55 {
+					log.Printf("[Room %s] Performance Warning: TPS dropped to %d (Expected: 60)", r.ID, ticks)
+				}
+				ticks = 0
+				tickTimer -= 1.0
+			}
 			
 			// Cap dt to prevent massive jumps if the server hangs briefly
 			if dt > 0.1 {
