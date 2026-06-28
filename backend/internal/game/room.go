@@ -249,6 +249,7 @@ func RunRoom(r *models.Room, a *app.App) {
 						"text":   "Time's up! Hiders win!",
 					})
 					BroadcastRaw(r, sysMsg)
+					BroadcastState(r)
 				} else if hidersCount == 0 && seekersCount > 0 {
 					r.State = "lobby"
 					sysMsg, _ := json.Marshal(map[string]interface{}{
@@ -257,6 +258,7 @@ func RunRoom(r *models.Room, a *app.App) {
 						"text":   "All hiders captured! Seekers win!",
 					})
 					BroadcastRaw(r, sysMsg)
+					BroadcastState(r)
 				}
 			}
 
