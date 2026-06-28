@@ -41,12 +41,6 @@ func CreateRoom(a *app.App, ip string, settings models.RoomSettings) (string, er
 	return roomID, nil
 }
 
-func GetRoomByIP(a *app.App, ip string) string {
-	a.Manager.Mu.RLock()
-	defer a.Manager.Mu.RUnlock()
-	return a.Manager.IpRooms[ip]
-}
-
 func RemoveRoom(a *app.App, roomID string) {
 	a.Manager.Mu.Lock()
 	defer a.Manager.Mu.Unlock()

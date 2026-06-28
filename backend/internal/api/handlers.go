@@ -39,13 +39,7 @@ func SetupRoutes(mux *http.ServeMux, a *app.App) {
 		json.NewEncoder(w).Encode(map[string]string{"roomId": roomID})
 	})
 
-	mux.HandleFunc("/api/my-rooms", func(w http.ResponseWriter, r *http.Request) {
-		ip := ws.GetIP(r)
-		roomID := game.GetRoomByIP(a, ip)
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"roomId": roomID})
-	})
 
 	mux.HandleFunc("/api/rooms/", func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")

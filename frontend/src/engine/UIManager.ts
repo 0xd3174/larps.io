@@ -23,10 +23,7 @@ export class UIManager {
             if (roomId) this.joinLobby(roomId);
         });
 
-        document.getElementById('btnMyRoom')!.addEventListener('click', async () => {
-            const roomId = await this.game.network.fetchMyRoom();
-            if (roomId) this.joinLobby(roomId);
-        });
+
 
         // No startGameBtn as requested by user
 

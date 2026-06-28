@@ -25,18 +25,7 @@ export class NetworkManager {
         }
     }
 
-    async fetchMyRoom(): Promise<string | null> {
-        try {
-            const res = await fetch('/api/my-rooms');
-            if (!res.ok) throw new Error(await res.text());
-            const data = await res.json();
-            if (!data.roomId) throw new Error("You don't have an active room.");
-            return data.roomId;
-        } catch (err: any) {
-            this.game.ui.showError(err.message);
-            return null;
-        }
-    }
+
 
     connect(roomId: string, nickname: string) {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
