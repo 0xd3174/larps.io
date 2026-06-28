@@ -13,6 +13,13 @@ func CreateRoom(a *app.App, ip string, settings models.RoomSettings) (string, er
 	defer a.Manager.Mu.Unlock()
 
 	if oldRoomID, exists := a.Manager.IpRooms[ip]; exists {
+		if oldRoom, ok := a.Manager.Rooms[oldRoomID]; ok {
+			select {
+			case <-oldRoom.Stop:
+			default:
+				close(oldRoom.Stop)
+			}
+		}
 		delete(a.Manager.Rooms, oldRoomID)
 		delete(a.Manager.IpRooms, ip)
 	}
@@ -30,6 +37,7 @@ func CreateRoom(a *app.App, ip string, settings models.RoomSettings) (string, er
 		Register:   make(chan *models.Client, 256),
 		Unregister: make(chan *models.Client, 256),
 		Action:     make(chan func(), 1024),
+		Stop:       make(chan struct{}),
 		Manager:    a.Manager,
 		Settings:   settings,
 	}
@@ -49,6 +57,11 @@ func RemoveRoom(a *app.App, roomID string) {
 	if room, exists := a.Manager.Rooms[roomID]; exists {
 		delete(a.Manager.IpRooms, room.HostIP)
 		delete(a.Manager.Rooms, roomID)
+		select {
+		case <-room.Stop:
+		default:
+			close(room.Stop)
+		}
 	}
 }
 

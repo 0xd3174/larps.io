@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"game-backend/internal/app"
@@ -77,12 +78,14 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 					}
 				}
 				
-				sendPublic("Starting in 3...")
-				time.Sleep(1 * time.Second)
-				sendPublic("2...")
-				time.Sleep(1 * time.Second)
-				sendPublic("1...")
-				time.Sleep(1 * time.Second)
+				for i := 3; i > 0; i-- {
+					sendPublic(fmt.Sprintf("%d...", i))
+					select {
+					case <-r.Stop:
+						return
+					case <-time.After(1 * time.Second):
+					}
+				}
 				
 				r.Action <- func() {
 					r.IsStarting = false

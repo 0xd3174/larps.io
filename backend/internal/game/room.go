@@ -109,6 +109,11 @@ func RunRoom(r *models.Room, a *app.App) {
 
 	for {
 		select {
+		case <-r.Stop:
+			for client := range r.Clients {
+				close(client.Send)
+			}
+			return
 		case fn := <-r.Action:
 			fn()
 		case t := <-ticker.C:

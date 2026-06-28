@@ -55,6 +55,7 @@ type Room struct {
 	Register   chan *Client
 	Unregister chan *Client
 	Action     chan func()
+	Stop       chan struct{}
 	Manager           *Manager
 	Settings          RoomSettings
 	SeekersLockedTime float64
