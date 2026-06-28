@@ -11,8 +11,9 @@ export async function loadMap() {
 
         if (mapData && mapData.tilesets && mapData.tilesets.length > 0) {
             const ts = mapData.tilesets[0];
+            const imageName = ts.image.split(/[/\\]/).pop();
             tilesetImage = new Image();
-            tilesetImage.src = '/' + ts.image;
+            tilesetImage.src = '/graphics/' + imageName;
             await new Promise((resolve) => {
                 tilesetImage!.onload = resolve;
                 tilesetImage!.onerror = resolve; // Continue even if missing

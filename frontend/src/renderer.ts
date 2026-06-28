@@ -32,7 +32,7 @@ export function draw() {
 }
 
 function drawGrid() {
-    if (mapData && tilesetImage) {
+    if (mapData && tilesetImage && tilesetImage.complete && tilesetImage.naturalWidth > 0) {
         const tw = mapData.tilewidth;
         const th = mapData.tileheight;
         const ts = mapData.tilesets[0];
