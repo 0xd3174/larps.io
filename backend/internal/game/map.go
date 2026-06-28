@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"os"
+	"strings"
 
 	"game-backend/internal/models"
 )
@@ -30,7 +31,7 @@ func IsWall(gameMap *models.MapData, x, y float64) bool {
 	bottom := int((y + Config.PlayerRadius) / float64(gameMap.TileHeight))
 
 	for _, layer := range gameMap.Layers {
-		if layer.Name == "Walls" && layer.Type == "tilelayer" {
+		if layer.Type == "tilelayer" && strings.HasSuffix(strings.ToLower(layer.Name), "_solid") {
 			for ty := top; ty <= bottom; ty++ {
 				for tx := left; tx <= right; tx++ {
 					if tx >= 0 && tx < gameMap.Width && ty >= 0 && ty < gameMap.Height {
@@ -52,7 +53,7 @@ func GetSpawnPoints(gameMap *models.MapData, role string) []models.ObjectData {
 		return spawns
 	}
 	for _, layer := range gameMap.Layers {
-		if layer.Name == "Spawns" && layer.Type == "objectgroup" {
+		if layer.Name == "spawns" && layer.Type == "objectgroup" {
 			for _, obj := range layer.Objects {
 				if obj.Name == role {
 					spawns = append(spawns, obj)
@@ -69,7 +70,7 @@ func GetTeleports(gameMap *models.MapData) []models.ObjectData {
 		return teleports
 	}
 	for _, layer := range gameMap.Layers {
-		if layer.Name == "Teleports" && layer.Type == "objectgroup" {
+		if layer.Name == "teleports" && layer.Type == "objectgroup" {
 			teleports = append(teleports, layer.Objects...)
 		}
 	}

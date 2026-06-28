@@ -65,9 +65,9 @@ export class Renderer {
             for (const layer of mapData.layers) {
                 if (layer.type !== 'tilelayer') continue;
                 
-                // 'Front' draws above players, everything else below
-                if (drawFront && layer.name !== 'Front') continue;
-                if (!drawFront && layer.name === 'Front') continue;
+                const isFront = layer.name.toLowerCase().includes('_front');
+                if (drawFront && !isFront) continue;
+                if (!drawFront && isFront) continue;
 
                 for (let i = 0; i < layer.data.length; i++) {
                     const gid = layer.data[i];
