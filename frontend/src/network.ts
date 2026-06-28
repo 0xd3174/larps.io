@@ -67,6 +67,12 @@ function handleServerMessage(msg: any) {
         }
     } else if (msg.type === 'chat') {
         appendChat(msg.sender, msg.text, msg.sender === 'SERVER');
+    } else if (msg.type === 'move') {
+        const p = roomData.players.find((player: Player) => player.nickname === msg.nickname);
+        if (p && p.nickname !== me.nickname) {
+            p.x = msg.x;
+            p.y = msg.y;
+        }
     }
 }
 
