@@ -16,9 +16,10 @@ type MapData struct {
 
 type LayerData struct {
 	Name    string       `json:"name"`
-	Type    string       `json:"type"` // "tilelayer" or "objectgroup"
+	Type    string       `json:"type"` // "tilelayer", "objectgroup", or "group"
 	Data    []int        `json:"data,omitempty"`
 	Objects []ObjectData `json:"objects,omitempty"`
+	Layers  []LayerData  `json:"layers,omitempty"`
 }
 
 type ObjectData struct {

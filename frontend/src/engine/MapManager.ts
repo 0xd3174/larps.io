@@ -12,6 +12,22 @@ export class MapManager {
             const res = await fetch('/api/map');
             this.mapData = await res.json();
 
+            const flattenLayers = (layers: any[]): any[] => {
+                let flat: any[] = [];
+                for (const layer of layers) {
+                    if (layer.type === 'group' && layer.layers) {
+                        flat = flat.concat(flattenLayers(layer.layers));
+                    } else {
+                        flat.push(layer);
+                    }
+                }
+                return flat;
+            };
+
+            if (this.mapData?.layers) {
+                this.mapData.layers = flattenLayers(this.mapData.layers);
+            }
+
             if (this.mapData?.tilesets && this.mapData.tilesets.length > 0) {
                 const ts = this.mapData.tilesets[0];
                 let imagePath = ts.image;

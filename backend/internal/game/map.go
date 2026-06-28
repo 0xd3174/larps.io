@@ -8,6 +8,18 @@ import (
 	"game-backend/internal/models"
 )
 
+func flattenLayers(layers []models.LayerData) []models.LayerData {
+	var flat []models.LayerData
+	for _, l := range layers {
+		if l.Type == "group" && len(l.Layers) > 0 {
+			flat = append(flat, flattenLayers(l.Layers)...)
+		} else {
+			flat = append(flat, l)
+		}
+	}
+	return flat
+}
+
 func LoadMap(path string) (*models.MapData, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -17,6 +29,7 @@ func LoadMap(path string) (*models.MapData, error) {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return nil, err
 	}
+	m.Layers = flattenLayers(m.Layers)
 	return &m, nil
 }
 

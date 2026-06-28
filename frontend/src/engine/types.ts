@@ -43,6 +43,7 @@ export interface MapLayer {
     height: number;
     x: number;
     y: number;
+    layers?: MapLayer[];
 }
 
 export interface Tileset {
