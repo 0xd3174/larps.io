@@ -1,4 +1,5 @@
 import { Game } from './Game';
+import { ServerMessage } from './types';
 
 export class NetworkManager {
     private game: Game;
@@ -47,7 +48,7 @@ export class NetworkManager {
         };
 
         this.ws.onmessage = (e) => {
-            const msg = JSON.parse(e.data);
+            const msg = JSON.parse(e.data) as ServerMessage;
             this.game.handleServerMessage(msg);
         };
 

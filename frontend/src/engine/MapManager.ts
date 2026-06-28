@@ -1,7 +1,8 @@
 import { CONFIG } from '../config';
+import { MapData } from './types';
 
 export class MapManager {
-    public mapData: any = null;
+    public mapData: MapData | null = null;
     public tilesetImage: HTMLImageElement | null = null;
     public width: number = 2000;
     public height: number = 2000;
@@ -44,7 +45,7 @@ export class MapManager {
         const top = Math.floor((y - CONFIG.PLAYER_RADIUS) / th);
         const bottom = Math.floor((y + CONFIG.PLAYER_RADIUS) / th);
 
-        const wallsLayer = this.mapData.layers.find((l: any) => l.name === 'Walls');
+        const wallsLayer = this.mapData.layers.find(l => l.name === 'Walls');
         if (!wallsLayer) return false;
 
         for (let ty = top; ty <= bottom; ty++) {

@@ -1,4 +1,5 @@
 import { CONFIG } from '../config';
+import { PlayerData } from './types';
 
 export class Player {
     public id: string;
@@ -19,7 +20,7 @@ export class Player {
         this.isLocal = isLocal;
     }
 
-    updateFromServer(data: any) {
+    updateFromServer(data: PlayerData) {
         this.id = data.id;
         this.role = data.role;
         this.health = data.health;

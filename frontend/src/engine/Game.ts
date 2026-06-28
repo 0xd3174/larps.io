@@ -4,6 +4,7 @@ import { InputManager } from './InputManager';
 import { NetworkManager } from './NetworkManager';
 import { UIManager } from './UIManager';
 import { Player } from './Player';
+import { ServerMessage } from './types';
 
 export class Game {
     public mapManager: MapManager;
@@ -42,7 +43,7 @@ export class Game {
         this.network.connect(roomId, nickname);
     }
 
-    public handleServerMessage(msg: any) {
+    public handleServerMessage(msg: ServerMessage) {
         if (msg.type === 'state') {
             this.state = msg.roomState;
             this.timeLeft = msg.timeLeft || 0;
