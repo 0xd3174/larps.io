@@ -1,5 +1,5 @@
 # Stage 1: Build the frontend with Bun
-FROM oven/bun:1 as frontend-builder
+FROM oven/bun:1 AS frontend-builder
 WORKDIR /app
 COPY shared.json ./
 WORKDIR /app/frontend
@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN bun run build
 
 # Stage 2: Build the Go backend
-FROM golang:1.22-alpine as backend-builder
+FROM golang:1.22-alpine AS backend-builder
 WORKDIR /app/backend
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download

@@ -38,6 +38,19 @@ export class UIManager {
                         this.game.network.sendChat(text);
                         chatInput.value = '';
                     }
+                    chatInput.blur();
+                } else if (e.key === 'Escape') {
+                    chatInput.blur();
+                }
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && document.activeElement !== chatInput) {
+                    const inGameUI = document.getElementById('inGameUI');
+                    if (inGameUI && !inGameUI.classList.contains('hidden')) {
+                        chatInput.focus();
+                        e.preventDefault();
+                    }
                 }
             });
         }

@@ -232,19 +232,7 @@ func RunRoom(r *models.Room, a *app.App) {
 			var msg map[string]interface{}
 			if err := json.Unmarshal(message, &msg); err == nil {
 				if msg["type"] == "chat" {
-					text, _ := msg["text"].(string)
-					senderIP, _ := msg["_senderIP"].(string)
-
-					delete(msg, "_senderIP")
-					delete(msg, "_senderID")
-					cleanMessage, _ := json.Marshal(msg)
-
-					if text == "/start" && senderIP == r.HostIP && r.State == "lobby" {
-						StartGame(r, a.GameMap)
-						continue
-					}
-
-					BroadcastRaw(r, cleanMessage)
+					HandleChatMessage(r, a, msg)
 					continue
 				}
 
