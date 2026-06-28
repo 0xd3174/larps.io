@@ -84,6 +84,7 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 	if r.TimeLeft <= 0 {
 		r.TimeLeft = 120 // fallback
 	}
+	r.SeekersLockedTime = 30.0
 
 	if len(seekerNames) > 2 {
 		seekerNames = seekerNames[:len(seekerNames)-2]
@@ -92,7 +93,7 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 	sysMsg, _ := json.Marshal(map[string]interface{}{
 		"type":   "chat",
 		"sender": "SERVER",
-		"text":   "Game Started! Seekers: " + seekerNames,
+		"text":   "Game Started! Seekers: " + seekerNames + ". Seekers are frozen for 30 seconds!",
 	})
 	BroadcastRaw(r, sysMsg)
 	BroadcastState(r)
@@ -122,6 +123,9 @@ func RunRoom(r *models.Room, a *app.App) {
 				}
 
 				if dx != 0 || dy != 0 {
+					if c.Role == "seeker" && r.SeekersLockedTime > 0 {
+						continue
+					}
 					length := math.Sqrt(dx*dx + dy*dy)
 					dx /= length
 					dy /= length
@@ -156,6 +160,17 @@ func RunRoom(r *models.Room, a *app.App) {
 
 			if r.State == "playing" {
 				r.TimeLeft -= dt
+				if r.SeekersLockedTime > 0 {
+					r.SeekersLockedTime -= dt
+					if r.SeekersLockedTime <= 0 {
+						sysMsg, _ := json.Marshal(map[string]interface{}{
+							"type":   "chat",
+							"sender": "SERVER",
+							"text":   "30 seconds have passed! Seekers are unleashed!",
+						})
+						BroadcastRaw(r, sysMsg)
+					}
+				}
 
 				hidersCount := 0
 				seekersCount := 0

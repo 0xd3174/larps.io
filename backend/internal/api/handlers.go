@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"strings"
 
 	"game-backend/internal/app"
 	"game-backend/internal/game"

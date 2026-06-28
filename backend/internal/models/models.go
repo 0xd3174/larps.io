@@ -53,9 +53,10 @@ type Room struct {
 	Broadcast  chan []byte
 	Register   chan *Client
 	Unregister chan *Client
-	Manager    *Manager
-	Mu         sync.Mutex
-	Settings   RoomSettings
+	Manager           *Manager
+	Mu                sync.Mutex
+	Settings          RoomSettings
+	SeekersLockedTime float64
 }
 
 type RoomSettings struct {
