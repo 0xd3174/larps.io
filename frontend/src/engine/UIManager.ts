@@ -9,37 +9,44 @@ export class UIManager {
     }
 
     private bindEvents() {
-        document.getElementById('createRoomBtn')!.addEventListener('click', async () => {
+        document.getElementById('btnCreate')!.addEventListener('click', async () => {
             const roomId = await this.game.network.createRoom();
             if (roomId) this.joinLobby(roomId);
         });
 
-        document.getElementById('joinRoomBtn')!.addEventListener('click', () => {
-            const roomId = prompt("Enter room ID to join:");
+        document.getElementById('btnJoin')!.addEventListener('click', () => {
+            const roomId = (document.getElementById('roomId') as HTMLInputElement).value.trim();
             if (roomId) this.joinLobby(roomId);
         });
 
-        document.getElementById('reconnectBtn')!.addEventListener('click', async () => {
+        document.getElementById('btnMyRoom')!.addEventListener('click', async () => {
             const roomId = await this.game.network.fetchMyRoom();
             if (roomId) this.joinLobby(roomId);
         });
 
-        document.getElementById('startGameBtn')!.addEventListener('click', () => {
-            fetch(`/api/rooms/${this.game.roomId}/start`, { method: 'POST' });
-        });
+        // If we want a startGameBtn, we should inject it or hook into an existing element
+        const startBtn = document.getElementById('startGameBtn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                fetch(`/api/rooms/${this.game.roomId}/start`, { method: 'POST' });
+            });
+        }
 
         const chatInput = document.getElementById('chatInput') as HTMLInputElement;
-        chatInput.addEventListener('focus', () => this.game.isChatFocused = true);
-        chatInput.addEventListener('blur', () => this.game.isChatFocused = false);
+        if (chatInput) {
+            chatInput.addEventListener('focus', () => this.game.isChatFocused = true);
+            chatInput.addEventListener('blur', () => this.game.isChatFocused = false);
 
-        document.getElementById('chatForm')!.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = chatInput.value.trim();
-            if (text) {
-                this.game.network.sendChat(text);
-                chatInput.value = '';
-            }
-        });
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const text = chatInput.value.trim();
+                    if (text) {
+                        this.game.network.sendChat(text);
+                        chatInput.value = '';
+                    }
+                }
+            });
+        }
     }
 
     public joinLobby(roomId: string) {
@@ -68,14 +75,14 @@ export class UIManager {
 
     public showMainMenu(errorMsg?: string) {
         document.getElementById('mainMenu')!.classList.remove('hidden');
-        document.getElementById('inGame')!.classList.add('hidden');
+        document.getElementById('inGameUI')!.classList.add('hidden');
         if (errorMsg) {
             this.showError(errorMsg);
         }
     }
 
     public showError(msg: string) {
-        const errDiv = document.getElementById('errorMsg')!;
+        const errDiv = document.getElementById('menuError')!;
         errDiv.innerText = msg;
         errDiv.classList.remove('hidden');
         setTimeout(() => errDiv.classList.add('hidden'), 3000);
@@ -83,11 +90,25 @@ export class UIManager {
 
     public updateInGameUI(roomId: string, gameState: string = 'lobby', isHost: boolean = false) {
         document.getElementById('mainMenu')!.classList.add('hidden');
-        document.getElementById('inGame')!.classList.remove('hidden');
+        document.getElementById('inGameUI')!.classList.remove('hidden');
 
-        document.getElementById('roomDisplay')!.innerText = `Room: ${roomId}`;
+        document.getElementById('roomInfo')!.innerText = `Room: ${roomId}`;
         
-        const startBtn = document.getElementById('startGameBtn') as HTMLButtonElement;
+        // Dynamic Start Game Button
+        let startBtn = document.getElementById('startGameBtn') as HTMLButtonElement;
+        if (!startBtn) {
+            startBtn = document.createElement('button');
+            startBtn.id = 'startGameBtn';
+            startBtn.className = 'btn primary-btn';
+            startBtn.innerText = 'Start Game';
+            startBtn.style.margin = '10px auto';
+            startBtn.style.display = 'block';
+            startBtn.addEventListener('click', () => {
+                fetch(`/api/rooms/${this.game.roomId}/start`, { method: 'POST' });
+            });
+            document.getElementById('inGameUI')!.insertBefore(startBtn, document.getElementById('chatBox'));
+        }
+
         if (gameState === 'lobby' && isHost) {
             startBtn.classList.remove('hidden');
         } else {
@@ -96,12 +117,11 @@ export class UIManager {
     }
 
     public updateHUD(gameState: string, timeLeft: number) {
-        const overlay = document.getElementById('gameOverlay')!;
+        const stateDiv = document.getElementById('gameState')!;
         if (gameState === 'playing') {
-            overlay.classList.remove('hidden');
-            document.getElementById('timeDisplay')!.innerText = `Time: ${Math.ceil(timeLeft)}s`;
+            stateDiv.innerText = `Time: ${Math.ceil(timeLeft)}s`;
         } else {
-            overlay.classList.add('hidden');
+            stateDiv.innerText = `Lobby`;
         }
     }
 
