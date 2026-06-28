@@ -127,6 +127,11 @@ export class UIManager {
         el.appendChild(senderSpan);
         el.appendChild(textNode);
         messages.appendChild(el);
+        
+        while (messages.childElementCount > 50) {
+            messages.removeChild(messages.firstChild!);
+        }
+        
         messages.scrollTop = messages.scrollHeight;
     }
 }

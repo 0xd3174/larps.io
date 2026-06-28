@@ -23,6 +23,12 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 		}
 	}
 
+	if senderClient != nil {
+		msg["sender"] = senderClient.Nickname
+	} else {
+		msg["sender"] = "Unknown"
+	}
+
 	// Remove internal fields before broadcasting
 	delete(msg, "_senderIP")
 	delete(msg, "_senderID")

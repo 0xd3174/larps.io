@@ -63,7 +63,6 @@ export class NetworkManager {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
         this.ws.send(JSON.stringify({
             type: 'chat',
-            sender: this.game.localPlayer?.nickname,
             text: text
         }));
     }
