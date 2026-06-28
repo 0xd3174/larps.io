@@ -79,20 +79,41 @@ export class Renderer {
                     for (let c = startCol; c <= endCol; c++) {
                         const i = r * layer.width + c;
                         const gid = layer.data[i];
-                        if (gid === 0 || gid < firstgid) continue;
+                        const trueGid = gid & 0x0FFFFFFF;
+                        if (trueGid === 0 || trueGid < firstgid) continue;
                         
-                        const tileId = gid - firstgid;
+                        const tileId = trueGid - firstgid;
                         const sx = (tileId % columns) * tw;
                         const sy = Math.floor(tileId / columns) * th;
-                        const dx = c * tw;
-                        const dy = r * th;
+                        const dstX = (layer.x || 0) * tw + c * tw;
+                        const dstY = (layer.y || 0) * th + r * th;
 
-                        this.ctx.drawImage(
-                            tilesetImage,
-                            sx, sy, tw, th,
-                            (layer.x || 0) * tw + dx, (layer.y || 0) * th + dy,
-                            tw, th
-                        );
+                        const flipH = (gid & 0x80000000) !== 0;
+                        const flipV = (gid & 0x40000000) !== 0;
+                        const flipD = (gid & 0x20000000) !== 0;
+
+                        if (flipH || flipV || flipD) {
+                            this.ctx.save();
+                            this.ctx.translate(dstX + tw / 2, dstY + th / 2);
+                            if (flipD) {
+                                this.ctx.transform(0, 1, 1, 0, 0, 0);
+                            }
+                            this.ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+                            this.ctx.drawImage(
+                                tilesetImage,
+                                sx, sy, tw, th,
+                                -tw / 2, -th / 2,
+                                tw, th
+                            );
+                            this.ctx.restore();
+                        } else {
+                            this.ctx.drawImage(
+                                tilesetImage,
+                                sx, sy, tw, th,
+                                dstX, dstY,
+                                tw, th
+                            );
+                        }
                     }
                 }
             }
