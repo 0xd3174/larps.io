@@ -24,13 +24,7 @@ export class UIManager {
             if (roomId) this.joinLobby(roomId);
         });
 
-        // If we want a startGameBtn, we should inject it or hook into an existing element
-        const startBtn = document.getElementById('startGameBtn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                fetch(`/api/rooms/${this.game.roomId}/start`, { method: 'POST' });
-            });
-        }
+        // No startGameBtn as requested by user
 
         const chatInput = document.getElementById('chatInput') as HTMLInputElement;
         if (chatInput) {
@@ -93,27 +87,6 @@ export class UIManager {
         document.getElementById('inGameUI')!.classList.remove('hidden');
 
         document.getElementById('roomInfo')!.innerText = `Room: ${roomId}`;
-        
-        // Dynamic Start Game Button
-        let startBtn = document.getElementById('startGameBtn') as HTMLButtonElement;
-        if (!startBtn) {
-            startBtn = document.createElement('button');
-            startBtn.id = 'startGameBtn';
-            startBtn.className = 'btn primary-btn';
-            startBtn.innerText = 'Start Game';
-            startBtn.style.margin = '10px auto';
-            startBtn.style.display = 'block';
-            startBtn.addEventListener('click', () => {
-                fetch(`/api/rooms/${this.game.roomId}/start`, { method: 'POST' });
-            });
-            document.getElementById('inGameUI')!.insertBefore(startBtn, document.getElementById('chatBox'));
-        }
-
-        if (gameState === 'lobby' && isHost) {
-            startBtn.classList.remove('hidden');
-        } else {
-            startBtn.classList.add('hidden');
-        }
     }
 
     public updateHUD(gameState: string, timeLeft: number) {
