@@ -41,18 +41,18 @@ export class Renderer {
         const camY = Math.round(this.canvas.height / 2) - Math.round(localPlayer.y);
         this.ctx.translate(camX, camY);
 
-        this.drawLayers(mapManager, false);
+        this.drawLayers(mapManager, false, camX, camY);
 
         for (const p of players) {
             this.drawPlayer(p, gameState);
         }
 
-        this.drawLayers(mapManager, true);
+        this.drawLayers(mapManager, true, camX, camY);
 
         this.ctx.restore();
     }
 
-    private drawLayers(mapManager: MapManager, drawFront: boolean) {
+    private drawLayers(mapManager: MapManager, drawFront: boolean, camX: number = 0, camY: number = 0) {
         const { mapData, tilesetImage } = mapManager;
 
         if (mapData && tilesetImage && tilesetImage.complete && tilesetImage.naturalWidth > 0) {
@@ -62,6 +62,12 @@ export class Renderer {
             const columns = ts.columns || Math.floor(ts.imagewidth / tw);
             const firstgid = ts.firstgid || 1;
 
+            const padding = 2;
+            const startCol = Math.max(0, Math.floor(-camX / tw) - padding);
+            const endCol = Math.min(mapData.width - 1, Math.floor((-camX + this.canvas.width) / tw) + padding);
+            const startRow = Math.max(0, Math.floor(-camY / th) - padding);
+            const endRow = Math.min(mapData.height - 1, Math.floor((-camY + this.canvas.height) / th) + padding);
+
             for (const layer of mapData.layers) {
                 if (layer.type !== 'tilelayer') continue;
                 
@@ -69,22 +75,25 @@ export class Renderer {
                 if (drawFront && !isFront) continue;
                 if (!drawFront && isFront) continue;
 
-                for (let i = 0; i < layer.data.length; i++) {
-                    const gid = layer.data[i];
-                    if (gid === 0 || gid < firstgid) continue;
-                    const tileId = gid - firstgid;
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startCol; c <= endCol; c++) {
+                        const i = r * layer.width + c;
+                        const gid = layer.data[i];
+                        if (gid === 0 || gid < firstgid) continue;
+                        
+                        const tileId = gid - firstgid;
+                        const sx = (tileId % columns) * tw;
+                        const sy = Math.floor(tileId / columns) * th;
+                        const dx = c * tw;
+                        const dy = r * th;
 
-                    const sx = (tileId % columns) * tw;
-                    const sy = Math.floor(tileId / columns) * th;
-                    const dx = (i % layer.width) * tw;
-                    const dy = Math.floor(i / layer.width) * th;
-
-                    this.ctx.drawImage(
-                        tilesetImage,
-                        sx, sy, tw, th,
-                        layer.x * tw + dx, layer.y * th + dy,
-                        tw, th
-                    );
+                        this.ctx.drawImage(
+                            tilesetImage,
+                            sx, sy, tw, th,
+                            (layer.x || 0) * tw + dx, (layer.y || 0) * th + dy,
+                            tw, th
+                        );
+                    }
                 }
             }
 
