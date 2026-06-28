@@ -40,8 +40,10 @@ export class UIManager {
                         chatInput.value = '';
                     }
                     chatInput.blur();
+                    e.stopPropagation();
                 } else if (e.key === 'Escape') {
                     chatInput.blur();
+                    e.stopPropagation();
                 }
             });
 
