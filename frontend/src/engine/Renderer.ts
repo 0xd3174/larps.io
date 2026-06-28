@@ -63,21 +63,39 @@ export class Renderer {
             const firstgid = ts.firstgid || 1;
 
             const padding = 2;
-            const startCol = Math.max(0, Math.floor(-camX / tw) - padding);
-            const endCol = Math.min(mapData.width - 1, Math.floor((-camX + this.canvas.width) / tw) + padding);
-            const startRow = Math.max(0, Math.floor(-camY / th) - padding);
-            const endRow = Math.min(mapData.height - 1, Math.floor((-camY + this.canvas.height) / th) + padding);
 
             for (const layer of mapData.layers) {
-                if (layer.type !== 'tilelayer') continue;
+                if (layer.type !== 'tilelayer' || !layer.data) continue;
                 
                 const isFront = layer.name.toLowerCase().includes('_front');
                 if (drawFront && !isFront) continue;
                 if (!drawFront && isFront) continue;
 
+                const layerWidth = layer.width || mapData.width;
+                const layerHeight = layer.height || mapData.height;
+                const lxTiles = layer.x || 0;
+                const lyTiles = layer.y || 0;
+                const lOffsetX = layer.offsetx || 0;
+                const lOffsetY = layer.offsety || 0;
+
+                const layerOriginWorldX = lxTiles * tw + lOffsetX;
+                const layerOriginWorldY = lyTiles * th + lOffsetY;
+
+                const viewLeft = -camX;
+                const viewRight = -camX + this.canvas.width;
+                const viewTop = -camY;
+                const viewBottom = -camY + this.canvas.height;
+
+                const startCol = Math.max(0, Math.floor((viewLeft - layerOriginWorldX) / tw) - padding);
+                const endCol = Math.min(layerWidth - 1, Math.floor((viewRight - layerOriginWorldX) / tw) + padding);
+                const startRow = Math.max(0, Math.floor((viewTop - layerOriginWorldY) / th) - padding);
+                const endRow = Math.min(layerHeight - 1, Math.floor((viewBottom - layerOriginWorldY) / th) + padding);
+
+                if (startCol > endCol || startRow > endRow) continue;
+
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startCol; c <= endCol; c++) {
-                        const i = r * layer.width + c;
+                        const i = r * layerWidth + c;
                         const gid = layer.data[i];
                         const trueGid = gid & 0x0FFFFFFF;
                         if (trueGid === 0 || trueGid < firstgid) continue;
@@ -85,8 +103,9 @@ export class Renderer {
                         const tileId = trueGid - firstgid;
                         const sx = (tileId % columns) * tw;
                         const sy = Math.floor(tileId / columns) * th;
-                        const dstX = (layer.x || 0) * tw + c * tw;
-                        const dstY = (layer.y || 0) * th + r * th;
+                        
+                        const dstX = layerOriginWorldX + c * tw;
+                        const dstY = layerOriginWorldY + r * th;
 
                         const flipH = (gid & 0x80000000) !== 0;
                         const flipV = (gid & 0x40000000) !== 0;
