@@ -54,8 +54,8 @@ type Room struct {
 	Broadcast  chan []byte
 	Register   chan *Client
 	Unregister chan *Client
+	Action     chan func()
 	Manager           *Manager
-	Mu                sync.Mutex
 	Settings          RoomSettings
 	SeekersLockedTime float64
 	IsStarting        bool

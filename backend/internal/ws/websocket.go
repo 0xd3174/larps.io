@@ -54,15 +54,21 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 		return
 	}
 
-	room.Mu.Lock()
-	for c := range room.Clients {
-		if c.Nickname == nickname {
-			room.Mu.Unlock()
-			http.Error(w, "Nickname already taken", http.StatusConflict)
-			return
+	nickTaken := make(chan bool)
+	room.Action <- func() {
+		for c := range room.Clients {
+			if c.Nickname == nickname {
+				nickTaken <- true
+				return
+			}
 		}
+		nickTaken <- false
 	}
-	room.Mu.Unlock()
+
+	if <-nickTaken {
+		http.Error(w, "Nickname already taken", http.StatusConflict)
+		return
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

@@ -51,24 +51,19 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 				return
 			}
 			
-			r.Mu.Lock()
 			if r.State != "lobby" {
-				r.Mu.Unlock()
 				sendPrivate(senderClient, "The game is already running.")
 				return
 			}
 			if len(r.Clients) < 2 {
-				r.Mu.Unlock()
 				sendPrivate(senderClient, "Need at least 2 players to start the game.")
 				return
 			}
 			if r.IsStarting {
-				r.Mu.Unlock()
 				sendPrivate(senderClient, "The game is already starting.")
 				return
 			}
 			r.IsStarting = true
-			r.Mu.Unlock()
 
 			go func() {
 				sendPublic := func(msgText string) {
@@ -77,7 +72,9 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 						"sender": "SERVER",
 						"text":   msgText,
 					})
-					BroadcastRaw(r, sysMsg)
+					r.Action <- func() {
+						BroadcastRaw(r, sysMsg)
+					}
 				}
 				
 				sendPublic("Starting in 3...")
@@ -87,9 +84,9 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 				sendPublic("1...")
 				time.Sleep(1 * time.Second)
 				
-				r.Mu.Lock()
-				r.IsStarting = false
-				r.Mu.Unlock()
+				r.Action <- func() {
+					r.IsStarting = false
+				}
 				
 				StartGame(r, a.GameMap)
 			}()

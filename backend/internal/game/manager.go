@@ -26,9 +26,10 @@ func CreateRoom(a *app.App, ip string, settings models.RoomSettings) (string, er
 		HostIP:     ip,
 		State:      "lobby",
 		Clients:    make(map[*models.Client]bool),
-		Broadcast:  make(chan []byte),
-		Register:   make(chan *models.Client),
-		Unregister: make(chan *models.Client),
+		Broadcast:  make(chan []byte, 256),
+		Register:   make(chan *models.Client, 256),
+		Unregister: make(chan *models.Client, 256),
+		Action:     make(chan func(), 1024),
 		Manager:    a.Manager,
 		Settings:   settings,
 	}

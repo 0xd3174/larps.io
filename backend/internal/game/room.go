@@ -12,9 +12,7 @@ import (
 )
 
 func StartGame(r *models.Room, gameMap *models.MapData) {
-	r.Mu.Lock()
-	defer r.Mu.Unlock()
-
+	r.Action <- func() {
 	if r.State != "lobby" {
 		return
 	}
@@ -98,6 +96,7 @@ func StartGame(r *models.Room, gameMap *models.MapData) {
 	})
 	BroadcastRaw(r, sysMsg)
 	BroadcastState(r)
+	}
 }
 
 func RunRoom(r *models.Room, a *app.App) {
@@ -110,6 +109,8 @@ func RunRoom(r *models.Room, a *app.App) {
 
 	for {
 		select {
+		case fn := <-r.Action:
+			fn()
 		case t := <-ticker.C:
 			dt := t.Sub(lastTime).Seconds()
 			lastTime = t
@@ -246,18 +247,14 @@ func RunRoom(r *models.Room, a *app.App) {
 			BroadcastState(r)
 
 		case client := <-r.Register:
-			r.Mu.Lock()
 			r.Clients[client] = true
-			r.Mu.Unlock()
 			BroadcastState(r)
 
 		case client := <-r.Unregister:
-			r.Mu.Lock()
 			_, ok := r.Clients[client]
 			if ok {
 				delete(r.Clients, client)
 			}
-			r.Mu.Unlock()
 			if ok {
 				close(client.Send)
 
