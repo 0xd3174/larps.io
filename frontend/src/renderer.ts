@@ -35,22 +35,24 @@ function drawGrid() {
     if (mapData && tilesetImage) {
         const tw = mapData.tilewidth;
         const th = mapData.tileheight;
-        const columns = Math.floor(mapData.tilesets[0].imagewidth / tw);
+        const ts = mapData.tilesets[0];
+        const columns = ts.columns || Math.floor(ts.imagewidth / tw);
+        const firstgid = ts.firstgid || 1;
 
         for (const layer of mapData.layers) {
             if (layer.type !== 'tilelayer') continue;
             for (let i = 0; i < layer.data.length; i++) {
                 const gid = layer.data[i];
-                if (gid === 0) continue;
-                const tileId = gid - 1;
-
+                if (gid === 0 || gid < firstgid) continue; 
+                const tileId = gid - firstgid;
+                
                 const sx = (tileId % columns) * tw;
                 const sy = Math.floor(tileId / columns) * th;
+                
+                const dx = (i % layer.width) * tw;
+                const dy = Math.floor(i / layer.width) * th;
 
-                const dx = (i % mapData.width) * tw;
-                const dy = Math.floor(i / mapData.width) * th;
-
-                ctx.drawImage(tilesetImage, sx, sy, tw, th, dx, dy, tw, th);
+                ctx.drawImage(tilesetImage, sx, sy, tw, th, layer.x * tw + dx, layer.y * th + dy, tw, th);
             }
         }
 
