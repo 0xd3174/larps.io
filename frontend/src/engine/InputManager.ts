@@ -1,5 +1,3 @@
-import { CONFIG } from '../config';
-
 export class InputManager {
     public up: boolean = false;
     public down: boolean = false;

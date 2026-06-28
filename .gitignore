@@ -7,4 +7,4 @@ backend/game-backend
 backend/server
 backend/test-backend
 
-
+*.log

@@ -11,7 +11,7 @@ export class NetworkManager {
 
     async createRoom(seekers: number, duration: number): Promise<string | null> {
         try {
-            const res = await fetch('/api/rooms', { 
+            const res = await fetch('/api/rooms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ seekers, duration })
@@ -29,8 +29,12 @@ export class NetworkManager {
 
     connect(roomId: string, nickname: string) {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws?room=${roomId}&nickname=${encodeURIComponent(nickname)}`;
-        
+        let host = window.location.host;
+        if (import.meta.env.DEV) {
+            host = 'localhost:8080';
+        }
+        const wsUrl = `${protocol}//${host}/ws?room=${roomId}&nickname=${encodeURIComponent(nickname)}`;
+
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
@@ -48,7 +52,7 @@ export class NetworkManager {
         this.ws.onclose = () => {
             window.location.href = '/';
         };
-        
+
         this.ws.onerror = () => {
             window.location.href = '/';
         };
