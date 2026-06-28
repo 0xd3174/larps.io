@@ -1,4 +1,3 @@
-
 services:
   game-app:
     build:

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"strings"
 	"unicode"
@@ -149,12 +150,21 @@ func generateID() string {
 }
 
 func GetIP(r *http.Request) string {
-	ip := r.Header.Get("X-Forwarded-For")
+	ip := r.Header.Get("X-Real-IP")
 	if ip == "" {
-		ip = r.RemoteAddr
+		ip = r.Header.Get("X-Forwarded-For")
 	}
-	if idx := strings.LastIndex(ip, ":"); idx != -1 {
-		ip = ip[:idx]
+
+	if ip != "" {
+		if parts := strings.Split(ip, ","); len(parts) > 0 {
+			ip = strings.TrimSpace(parts[0])
+		}
+		return ip
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
 	}
 	return ip
 }
