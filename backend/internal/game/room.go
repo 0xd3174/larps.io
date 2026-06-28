@@ -215,7 +215,7 @@ func RunRoom(r *models.Room, a *app.App) {
 						distSq := dx*dx + dy*dy
 
 						if distSq < 1600 {
-							c2.Health -= 100.0 / 60.0
+							c2.Health -= 100.0 * dt
 							if c2.Health <= 0 {
 								c2.Role = "seeker"
 								c2.Health = 100
