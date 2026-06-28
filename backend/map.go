@@ -6,10 +6,10 @@ import (
 )
 
 type MapData struct {
-	Width      int `json:"width"`
-	Height     int `json:"height"`
-	TileWidth  int `json:"tilewidth"`
-	TileHeight int `json:"tileheight"`
+	Width      int         `json:"width"`
+	Height     int         `json:"height"`
+	TileWidth  int         `json:"tilewidth"`
+	TileHeight int         `json:"tileheight"`
 	Layers     []LayerData `json:"layers"`
 }
 

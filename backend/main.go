@@ -6,9 +6,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"math/rand"
+	"time"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -42,9 +46,27 @@ func main() {
 	http.HandleFunc("/api/my-rooms", func(w http.ResponseWriter, r *http.Request) {
 		ip := getIP(r)
 		roomID := manager.GetRoomByIP(ip)
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"roomId": roomID})
+	})
+
+	http.HandleFunc("/api/rooms/", func(w http.ResponseWriter, r *http.Request) {
+		// Expect /api/rooms/{id}/start
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) == 5 && parts[4] == "start" && r.Method == http.MethodPost {
+			roomID := parts[3]
+			manager.mu.RLock()
+			room, exists := manager.rooms[roomID]
+			manager.mu.RUnlock()
+
+			if exists && room.State == "lobby" && getIP(r) == room.HostIP {
+				room.StartGame()
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+		}
+		http.Error(w, "Not found or unauthorized", http.StatusNotFound)
 	})
 
 	// WebSocket Endpoint

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
+	"encoding/hex"
 	"errors"
 	"log"
+	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -129,6 +129,7 @@ type Room struct {
 	Register   chan *Client
 	Unregister chan *Client
 	manager    *Manager
+	mu         sync.Mutex
 }
 
 func (r *Room) Run() {
@@ -140,7 +141,7 @@ func (r *Room) Run() {
 		case <-ticker.C:
 			if r.State == "playing" {
 				r.TimeLeft -= 1.0 / 60.0
-				
+
 				hidersCount := 0
 				seekersCount := 0
 
@@ -163,16 +164,16 @@ func (r *Room) Run() {
 						dx := c1.X - c2.X
 						dy := c1.Y - c2.Y
 						distSq := dx*dx + dy*dy
-						
+
 						if distSq < 1600 {
 							c2.Health -= 100.0 / 60.0
 							if c2.Health <= 0 {
 								c2.Role = "seeker"
 								c2.Health = 100
 								sysMsg, _ := json.Marshal(map[string]interface{}{
-									"type": "chat",
+									"type":   "chat",
 									"sender": "SERVER",
-									"text": c2.Nickname + " was captured and is now a seeker!",
+									"text":   c2.Nickname + " was captured and is now a seeker!",
 								})
 								r.broadcastRaw(sysMsg)
 							}
@@ -183,21 +184,21 @@ func (r *Room) Run() {
 				if r.TimeLeft <= 0 {
 					r.State = "lobby"
 					sysMsg, _ := json.Marshal(map[string]interface{}{
-						"type": "chat",
+						"type":   "chat",
 						"sender": "SERVER",
-						"text": "Time's up! Hiders win!",
+						"text":   "Time's up! Hiders win!",
 					})
 					r.broadcastRaw(sysMsg)
 				} else if hidersCount == 0 && seekersCount > 0 {
 					r.State = "lobby"
 					sysMsg, _ := json.Marshal(map[string]interface{}{
-						"type": "chat",
+						"type":   "chat",
 						"sender": "SERVER",
-						"text": "All hiders captured! Seekers win!",
+						"text":   "All hiders captured! Seekers win!",
 					})
 					r.broadcastRaw(sysMsg)
 				}
-				
+
 				r.broadcastState()
 			}
 
@@ -221,12 +222,12 @@ func (r *Room) Run() {
 						oldHostIP := r.HostIP
 						r.HostIP = c.IP
 						r.manager.ChangeHost(r.ID, oldHostIP, c.IP)
-						
+
 						// Notify new host
 						msg, _ := json.Marshal(map[string]interface{}{
-							"type": "chat",
+							"type":   "chat",
 							"sender": "SERVER",
-							"text": "You are now the room host.",
+							"text":   "You are now the room host.",
 						})
 						c.Send <- msg
 						break
@@ -243,50 +244,16 @@ func (r *Room) Run() {
 				if msg["type"] == "chat" {
 					text, _ := msg["text"].(string)
 					senderIP, _ := msg["_senderIP"].(string)
-					
+
 					// Remove senderIP before broadcasting so we don't leak it to clients
 					delete(msg, "_senderIP")
 					cleanMessage, _ := json.Marshal(msg)
 
 					if text == "/start" && senderIP == r.HostIP && r.State == "lobby" {
-						var clients []*Client
-						for c := range r.Clients {
-							clients = append(clients, c)
-						}
-						
-						if len(clients) < 2 {
-							sysMsg, _ := json.Marshal(map[string]interface{}{
-								"type": "chat",
-								"sender": "SERVER",
-								"text": "Need at least 2 players to start.",
-							})
-							r.broadcastRaw(sysMsg)
-							continue
-						}
-
-						for _, c := range clients {
-							c.Role = "hider"
-							c.Health = 100
-						}
-
-						b := make([]byte, 1)
-						rand.Read(b)
-						seekerIdx := int(b[0]) % len(clients)
-						clients[seekerIdx].Role = "seeker"
-
-						r.State = "playing"
-						r.TimeLeft = 120 // 2 minutes round
-
-						sysMsg, _ := json.Marshal(map[string]interface{}{
-							"type": "chat",
-							"sender": "SERVER",
-							"text": "Game Started! " + clients[seekerIdx].Nickname + " is the Seeker!",
-						})
-						r.broadcastRaw(sysMsg)
-						r.broadcastState()
+						r.StartGame()
 						continue
 					}
-					
+
 					r.broadcastRaw(cleanMessage)
 					continue
 				}
@@ -304,21 +271,21 @@ func (r *Room) broadcastState() {
 	players := make([]map[string]interface{}, 0)
 	for c := range r.Clients {
 		players = append(players, map[string]interface{}{
-			"id": c.ID,
+			"id":       c.ID,
 			"nickname": c.Nickname,
-			"isHost": c.IP == r.HostIP,
-			"x": c.X,
-			"y": c.Y,
-			"role": c.Role,
-			"health": c.Health,
+			"isHost":   c.IP == r.HostIP,
+			"x":        c.X,
+			"y":        c.Y,
+			"role":     c.Role,
+			"health":   c.Health,
 		})
 	}
 
 	stateMsg, _ := json.Marshal(map[string]interface{}{
-		"type": "state",
+		"type":      "state",
 		"roomState": r.State,
-		"timeLeft": r.TimeLeft,
-		"players": players,
+		"timeLeft":  r.TimeLeft,
+		"players":   players,
 	})
 	r.broadcastRaw(stateMsg)
 }
@@ -363,9 +330,17 @@ func (c *Client) ReadPump() {
 			// Update position if movement message
 			if parsed["type"] == "move" {
 				var newX, newY float64
-				if x, ok := parsed["x"].(float64); ok { newX = x } else { newX = c.X }
-				if y, ok := parsed["y"].(float64); ok { newY = y } else { newY = c.Y }
-				
+				if x, ok := parsed["x"].(float64); ok {
+					newX = x
+				} else {
+					newX = c.X
+				}
+				if y, ok := parsed["y"].(float64); ok {
+					newY = y
+				} else {
+					newY = c.Y
+				}
+
 				if !IsWall(newX, newY) {
 					c.X = newX
 					c.Y = newY
@@ -381,10 +356,10 @@ func (c *Client) ReadPump() {
 				parsed["y"] = c.Y
 				parsed["nickname"] = c.Nickname
 			}
-			
+
 			// Inject sender IP for server logic
 			parsed["_senderIP"] = c.IP
-			
+
 			// Re-marshal and pass to room
 			msgBytes, _ := json.Marshal(parsed)
 			c.Room.Broadcast <- msgBytes
