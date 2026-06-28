@@ -31,7 +31,8 @@ export class NetworkManager {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         let host = window.location.host;
         if (import.meta.env.DEV) {
-            host = 'localhost:8080';
+            const backendPort = import.meta.env.VITE_BACKEND_PORT || '8080';
+            host = `localhost:${backendPort}`;
         }
         const wsUrl = `${protocol}//${host}/ws?room=${roomId}&nickname=${encodeURIComponent(nickname)}`;
 
