@@ -64,6 +64,13 @@ function handleServerMessage(msg: any) {
         if (myData) {
             me.id = myData.id;
             updateInGameUI(roomData.id as string, roomData.state, myData.isHost);
+
+            // If the server teleports us (e.g. game start), sync the position
+            const distSq = (me.x - myData.x)**2 + (me.y - myData.y)**2;
+            if (distSq > 40000) { // 200 pixels
+                me.x = myData.x;
+                me.y = myData.y;
+            }
         }
     } else if (msg.type === 'chat') {
         appendChat(msg.sender, msg.text, msg.sender === 'SERVER');

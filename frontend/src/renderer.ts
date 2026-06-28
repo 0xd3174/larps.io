@@ -18,8 +18,8 @@ export function draw() {
     ctx.imageSmoothingEnabled = false; // Prevent tile bleeding
     
     // Round camera position to fix sub-pixel black gaps between tiles
-    const camX = Math.round(canvas.width / 2 - me.x);
-    const camY = Math.round(canvas.height / 2 - me.y);
+    const camX = Math.round(canvas.width / 2) - Math.round(me.x);
+    const camY = Math.round(canvas.height / 2) - Math.round(me.y);
     ctx.translate(camX, camY);
 
     drawGrid();
@@ -84,8 +84,8 @@ function drawGrid() {
 
 function drawPlayer(p: Player) {
     const isMe = p.nickname === me.nickname;
-    const x = isMe ? me.x : p.x;
-    const y = isMe ? me.y : p.y;
+    const x = isMe ? Math.round(me.x) : Math.round(p.x);
+    const y = isMe ? Math.round(me.y) : Math.round(p.y);
 
     let strokeColor = '#aaa';
     if (roomData.state === 'playing') {
