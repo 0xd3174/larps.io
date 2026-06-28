@@ -57,6 +57,7 @@ type Room struct {
 	Mu                sync.Mutex
 	Settings          RoomSettings
 	SeekersLockedTime float64
+	IsStarting        bool
 }
 
 type RoomSettings struct {
