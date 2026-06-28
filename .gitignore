@@ -7,4 +7,6 @@ backend/game-backend
 backend/server
 backend/test-backend
 
+docker-compose.yml
+
 *.log
