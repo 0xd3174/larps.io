@@ -169,8 +169,12 @@ func RunRoom(r *models.Room, a *app.App) {
 					dx /= length
 					dy /= length
 
-					newX := c.X + dx*Config.PlayerSpeed*dt
-					newY := c.Y + dy*Config.PlayerSpeed*dt
+					speed := Config.PlayerSpeed
+					if c.Shift {
+						speed *= 0.5
+					}
+					newX := c.X + dx*speed*dt
+					newY := c.Y + dy*speed*dt
 
 					c.X, c.Y = ResolveMapCollision(a.GameMap, newX, newY, float64(Config.PlayerRadius))
 
@@ -372,6 +376,9 @@ func RunRoom(r *models.Room, a *app.App) {
 						}
 						if right, ok := msg["right"].(bool); ok {
 							senderClient.Right = right
+						}
+						if shift, ok := msg["shift"].(bool); ok {
+							senderClient.Shift = shift
 						}
 					}
 					continue

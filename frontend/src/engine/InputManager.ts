@@ -3,7 +3,8 @@ export class InputManager {
         up: false,
         down: false,
         left: false,
-        right: false
+        right: false,
+        shift: false
     };
     private keys: Record<string, boolean> = {};
 
@@ -18,6 +19,7 @@ export class InputManager {
             this.directions.down = false;
             this.directions.left = false;
             this.directions.right = false;
+            this.directions.shift = false;
             return;
         }
 
@@ -25,5 +27,6 @@ export class InputManager {
         this.directions.down = !!(this.keys['s'] || this.keys['ы'] || this.keys['arrowdown']);
         this.directions.left = !!(this.keys['a'] || this.keys['ф'] || this.keys['arrowleft']);
         this.directions.right = !!(this.keys['d'] || this.keys['в'] || this.keys['arrowright']);
+        this.directions.shift = !!(this.keys['shift']);
     }
 }

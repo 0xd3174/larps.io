@@ -77,6 +77,6 @@ type Client struct {
 	Nickname string
 	Role     string
 	Health   float64
-	X, Y                     float64
-	Up, Down, Left, Right    bool
+	X, Y                            float64
+	Up, Down, Left, Right, Shift    bool
 }

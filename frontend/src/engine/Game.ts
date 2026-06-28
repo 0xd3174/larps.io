@@ -120,6 +120,7 @@ export class Game {
     private lastSentDown = false;
     private lastSentLeft = false;
     private lastSentRight = false;
+    private lastSentShift = false;
 
     private processInput() {
         if (!this.localPlayer) return;
@@ -130,13 +131,15 @@ export class Game {
         const down = this.input.directions.down;
         const left = this.input.directions.left;
         const right = this.input.directions.right;
+        const shift = this.input.directions.shift;
 
-        if (up !== this.lastSentUp || down !== this.lastSentDown || left !== this.lastSentLeft || right !== this.lastSentRight) {
-            this.network.sendInput(up, down, left, right);
+        if (up !== this.lastSentUp || down !== this.lastSentDown || left !== this.lastSentLeft || right !== this.lastSentRight || shift !== this.lastSentShift) {
+            this.network.sendInput(up, down, left, right, shift);
             this.lastSentUp = up;
             this.lastSentDown = down;
             this.lastSentLeft = left;
             this.lastSentRight = right;
+            this.lastSentShift = shift;
         }
     }
 

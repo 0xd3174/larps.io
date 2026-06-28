@@ -72,14 +72,15 @@ export class NetworkManager {
         }));
     }
 
-    sendInput(up: boolean, down: boolean, left: boolean, right: boolean) {
+    sendInput(up: boolean, down: boolean, left: boolean, right: boolean, shift: boolean) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
         this.ws.send(JSON.stringify({
             type: 'input',
             up: up,
             down: down,
             left: left,
-            right: right
+            right: right,
+            shift: shift
         }));
     }
 }
