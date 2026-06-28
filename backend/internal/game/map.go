@@ -24,10 +24,10 @@ func IsWall(gameMap *models.MapData, x, y float64) bool {
 		return false
 	}
 
-	left := int((x - 20) / float64(gameMap.TileWidth))
-	right := int((x + 20) / float64(gameMap.TileWidth))
-	top := int((y - 20) / float64(gameMap.TileHeight))
-	bottom := int((y + 20) / float64(gameMap.TileHeight))
+	left := int((x - Config.PlayerRadius) / float64(gameMap.TileWidth))
+	right := int((x + Config.PlayerRadius) / float64(gameMap.TileWidth))
+	top := int((y - Config.PlayerRadius) / float64(gameMap.TileHeight))
+	bottom := int((y + Config.PlayerRadius) / float64(gameMap.TileHeight))
 
 	for _, layer := range gameMap.Layers {
 		if layer.Name == "Walls" && layer.Type == "tilelayer" {

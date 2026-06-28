@@ -26,6 +26,14 @@ func main() {
 		log.Println("Warning: Could not load map.json. Collisions disabled.", err)
 	}
 
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "../shared.json"
+	}
+	if err := game.LoadConfig(configPath); err != nil {
+		log.Println("Warning: Could not load shared.json. Using defaults.", err)
+	}
+
 	application := app.NewApp(gameMap)
 
 	mux := http.NewServeMux()

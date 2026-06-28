@@ -24,8 +24,8 @@ export class Renderer {
 
     public draw(
         localPlayer: Player | null,
-        players: Player[], 
-        mapManager: MapManager, 
+        players: Player[],
+        mapManager: MapManager,
         gameState: string
     ) {
         this.ctx.fillStyle = CONFIG.COLORS.BACKGROUND;
@@ -35,7 +35,7 @@ export class Renderer {
 
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = false;
-        
+
         const camX = Math.round(this.canvas.width / 2) - Math.round(localPlayer.x);
         const camY = Math.round(this.canvas.height / 2) - Math.round(localPlayer.y);
         this.ctx.translate(camX, camY);
@@ -51,7 +51,7 @@ export class Renderer {
 
     private drawGrid(mapManager: MapManager) {
         const { mapData, tilesetImage } = mapManager;
-        
+
         if (mapData && tilesetImage && tilesetImage.complete && tilesetImage.naturalWidth > 0) {
             const tw = mapData.tilewidth;
             const th = mapData.tileheight;
@@ -63,18 +63,18 @@ export class Renderer {
                 if (layer.type !== 'tilelayer') continue;
                 for (let i = 0; i < layer.data.length; i++) {
                     const gid = layer.data[i];
-                    if (gid === 0 || gid < firstgid) continue; 
+                    if (gid === 0 || gid < firstgid) continue;
                     const tileId = gid - firstgid;
-                    
+
                     const sx = (tileId % columns) * tw;
                     const sy = Math.floor(tileId / columns) * th;
                     const dx = (i % layer.width) * tw;
                     const dy = Math.floor(i / layer.width) * th;
 
                     this.ctx.drawImage(
-                        tilesetImage, 
-                        sx, sy, tw, th, 
-                        layer.x * tw + dx, layer.y * th + dy, 
+                        tilesetImage,
+                        sx, sy, tw, th,
+                        layer.x * tw + dx, layer.y * th + dy,
                         tw, th
                     );
                 }
@@ -136,10 +136,10 @@ export class Renderer {
         if (p.isHost) {
             this.ctx.fillStyle = CONFIG.COLORS.HOST_INDICATOR;
             this.ctx.beginPath();
-            
+
             let hostX = x;
-            let hostY = y - 30; // Default center top
-            
+            let hostY = y - 36; // Default center top
+
             if (hpVisible) {
                 hostX = x + CONFIG.HOST_INDICATOR_OFFSET_X;
                 hostY = y + CONFIG.HOST_INDICATOR_OFFSET_Y;
@@ -152,6 +152,6 @@ export class Renderer {
         this.ctx.fillStyle = CONFIG.COLORS.TEXT;
         this.ctx.font = CONFIG.FONTS.PLAYER_NAME;
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(p.nickname, x, y + 40);
+        this.ctx.fillText(p.nickname, x, y + 36);
     }
 }

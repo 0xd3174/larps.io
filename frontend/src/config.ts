@@ -1,12 +1,19 @@
+import SharedConfig from '../../shared.json';
+
+const PLAYER_RADIUS = SharedConfig.PLAYER_RADIUS;
+const HEALTH_BAR_HEIGHT = 5;
+const HEALTH_BAR_OFFSET_Y = -35;
+const TELEPORT_DISTANCE = 200;
+
 export const CONFIG = {
-    PLAYER_RADIUS: 20,
-    PLAYER_SPEED: 250,
+    PLAYER_RADIUS,
+    PLAYER_SPEED: SharedConfig.PLAYER_SPEED,
     HOST_INDICATOR_RADIUS: 5,
-    HOST_INDICATOR_OFFSET_X: 30, // PLAYER_RADIUS (20) + 10px padding
-    HOST_INDICATOR_OFFSET_Y: -32.5, // Center of the health bar (HEALTH_BAR_OFFSET_Y + HEALTH_BAR_HEIGHT / 2)
-    HEALTH_BAR_WIDTH: 40,
-    HEALTH_BAR_HEIGHT: 5,
-    HEALTH_BAR_OFFSET_Y: -35,
+    HOST_INDICATOR_OFFSET_X: PLAYER_RADIUS + 10,
+    HOST_INDICATOR_OFFSET_Y: HEALTH_BAR_OFFSET_Y + HEALTH_BAR_HEIGHT / 2,
+    HEALTH_BAR_WIDTH: PLAYER_RADIUS * 2,
+    HEALTH_BAR_HEIGHT,
+    HEALTH_BAR_OFFSET_Y,
     TILE_SIZE: 64,
     COLORS: {
         BACKGROUND: '#0f172a',
@@ -16,12 +23,13 @@ export const CONFIG = {
         HIDER: '#3b82f6',
         LOBBY_OTHER: '#aaa',
         HOST_INDICATOR: '#fbbf24',
-        TEXT: '#fff'
+        TEXT: '#d1d1d1'
     },
     FONTS: {
-        PLAYER_NAME: '14px sans-serif'
+        PLAYER_NAME: '12px sans-serif'
     },
     NETWORK: {
-        TELEPORT_DISTANCE_SQ: 40000 // 200 pixels
+        TELEPORT_DISTANCE,
+        TELEPORT_DISTANCE_SQ: TELEPORT_DISTANCE * TELEPORT_DISTANCE
     }
 };
