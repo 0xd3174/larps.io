@@ -1,0 +1,80 @@
+import { Game } from './Game';
+
+export class NetworkManager {
+    private game: Game;
+    private ws: WebSocket | null = null;
+
+    constructor(game: Game) {
+        this.game = game;
+    }
+
+    async createRoom(): Promise<string | null> {
+        try {
+            const res = await fetch('/api/rooms', { method: 'POST' });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            return data.roomId;
+        } catch (err: any) {
+            this.game.ui.showError(err.message);
+            return null;
+        }
+    }
+
+    async fetchMyRoom(): Promise<string | null> {
+        try {
+            const res = await fetch('/api/my-rooms');
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            if (!data.roomId) throw new Error("You don't have an active room.");
+            return data.roomId;
+        } catch (err: any) {
+            this.game.ui.showError(err.message);
+            return null;
+        }
+    }
+
+    connect(roomId: string, nickname: string) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws?room=${roomId}&nickname=${encodeURIComponent(nickname)}`;
+        
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+            this.game.roomId = roomId;
+            this.game.ui.updateInGameUI(roomId);
+            window.history.replaceState({}, '', `?room=${roomId}`);
+            this.game.ui.appendChat('SYSTEM', 'Connected to room. Share URL to invite friends.', true);
+        };
+
+        this.ws.onmessage = (e) => {
+            const msg = JSON.parse(e.data);
+            this.game.handleServerMessage(msg);
+        };
+
+        this.ws.onclose = () => {
+            this.game.ui.showMainMenu('Connection lost. Please reconnect.');
+        };
+        
+        this.ws.onerror = () => {
+            this.game.ui.showMainMenu('WebSocket error.');
+        };
+    }
+
+    sendChat(text: string) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+        this.ws.send(JSON.stringify({
+            type: 'chat',
+            sender: this.game.localPlayer?.nickname,
+            text: text
+        }));
+    }
+
+    sendMove(x: number, y: number) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+        this.ws.send(JSON.stringify({
+            type: 'move',
+            x: x,
+            y: y
+        }));
+    }
+}
