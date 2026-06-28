@@ -1,8 +1,10 @@
+.direnv
+
 frontend/dist
 frontend/node_modules
-
-.direnv
 
 backend/game-backend
 backend/server
 backend/test-backend
+
+Maps/

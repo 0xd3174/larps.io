@@ -53,11 +53,11 @@ export class NetworkManager {
         };
 
         this.ws.onclose = () => {
-            this.game.ui.showMainMenu('Connection lost. Please reconnect.');
+            window.location.href = '/';
         };
         
         this.ws.onerror = () => {
-            this.game.ui.showMainMenu('WebSocket error.');
+            window.location.href = '/';
         };
     }
 
