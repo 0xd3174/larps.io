@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/gorilla/websocket"
@@ -23,7 +24,13 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-const maxNicknameLen = 20
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 2048
+	maxNicknameLen = 20
+)
 
 func SanitizeNickname(raw string) string {
 	nick := strings.TrimSpace(raw)
@@ -119,6 +126,10 @@ func ReadPump(c *models.Client) {
 		c.Conn.Close()
 	}()
 
+	c.Conn.SetReadLimit(maxMessageSize)
+	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.Conn.SetPongHandler(func(string) error { c.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
@@ -137,15 +148,27 @@ func ReadPump(c *models.Client) {
 }
 
 func WritePump(c *models.Client) {
-	defer c.Conn.Close()
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.Conn.Close()
+	}()
 	for {
-		message, ok := <-c.Send
-		if !ok {
-			c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-			return
-		}
-		if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			return
+		select {
+		case message, ok := <-c.Send:
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				return
+			}
+		case <-ticker.C:
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
 		}
 	}
 }
