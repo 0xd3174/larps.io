@@ -47,6 +47,10 @@ canvas {
   display: none !important;
 }
 
+.hidden {
+  display: none !important;
+}
+
 #inGameUI.overlay {
   background-color: transparent;
   pointer-events: none;
