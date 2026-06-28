@@ -133,16 +133,7 @@ func RunRoom(r *models.Room, a *app.App) {
 					newX := c.X + dx*Config.PlayerSpeed*dt
 					newY := c.Y + dy*Config.PlayerSpeed*dt
 
-					if !IsWall(a.GameMap, newX, newY) {
-						c.X = newX
-						c.Y = newY
-					} else {
-						if !IsWall(a.GameMap, newX, c.Y) {
-							c.X = newX
-						} else if !IsWall(a.GameMap, c.X, newY) {
-							c.Y = newY
-						}
-					}
+					c.X, c.Y = ResolveMapCollision(a.GameMap, newX, newY, float64(Config.PlayerRadius))
 
 					if a.GameMap != nil {
 						if c.X < 0 { c.X = 0 }
