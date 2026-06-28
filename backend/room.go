@@ -362,8 +362,24 @@ func (c *Client) ReadPump() {
 		if err := json.Unmarshal(message, &parsed); err == nil {
 			// Update position if movement message
 			if parsed["type"] == "move" {
-				if x, ok := parsed["x"].(float64); ok { c.X = x }
-				if y, ok := parsed["y"].(float64); ok { c.Y = y }
+				var newX, newY float64
+				if x, ok := parsed["x"].(float64); ok { newX = x } else { newX = c.X }
+				if y, ok := parsed["y"].(float64); ok { newY = y } else { newY = c.Y }
+				
+				if !IsWall(newX, newY) {
+					c.X = newX
+					c.Y = newY
+				} else {
+					if !IsWall(newX, c.Y) {
+						c.X = newX
+					} else if !IsWall(c.X, newY) {
+						c.Y = newY
+					}
+				}
+
+				parsed["x"] = c.X
+				parsed["y"] = c.Y
+				parsed["nickname"] = c.Nickname
 			}
 			
 			// Inject sender IP for server logic

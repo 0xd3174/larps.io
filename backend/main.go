@@ -14,6 +14,11 @@ func main() {
 		port = "8080"
 	}
 
+	err := LoadMap("../frontend/public/map.json")
+	if err != nil {
+		log.Println("Warning: Could not load map.json. Collisions disabled.", err)
+	}
+
 	manager := NewManager()
 
 	// API Endpoints

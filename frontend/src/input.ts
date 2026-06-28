@@ -1,6 +1,6 @@
-import { me } from './state';
+import { me, MAP_WIDTH, MAP_HEIGHT } from './state';
 import { sendMove } from './network';
-import { MAP_WIDTH, MAP_HEIGHT } from './state';
+import { isWall } from './map';
 
 export const keys: Record<string, boolean> = {
     w: false, a: false, s: false, d: false,
@@ -28,8 +28,16 @@ export function updateInput(dt: number, isChatFocused: boolean) {
     }
 
     if (me.vx !== 0 || me.vy !== 0) {
-        me.x += me.vx * dt;
-        me.y += me.vy * dt;
+        const newX = me.x + me.vx * dt;
+        const newY = me.y + me.vy * dt;
+
+        if (!isWall(newX, me.y)) {
+            me.x = newX;
+        }
+        if (!isWall(me.x, newY)) {
+            me.y = newY;
+        }
+
         me.x = Math.max(0, Math.min(me.x, MAP_WIDTH));
         me.y = Math.max(0, Math.min(me.y, MAP_HEIGHT));
         

@@ -26,3 +26,29 @@ export async function loadMap() {
         console.error("Failed to load map.json", e);
     }
 }
+
+export function isWall(x: number, y: number): boolean {
+    if (!mapData) return false;
+    const tw = mapData.tilewidth;
+    const th = mapData.tileheight;
+    
+    const left = Math.floor((x - 20) / tw);
+    const right = Math.floor((x + 20) / tw);
+    const top = Math.floor((y - 20) / th);
+    const bottom = Math.floor((y + 20) / th);
+
+    const wallsLayer = mapData.layers.find((l: any) => l.name === 'Walls');
+    if (!wallsLayer) return false;
+
+    for (let ty = top; ty <= bottom; ty++) {
+        for (let tx = left; tx <= right; tx++) {
+            if (tx >= 0 && tx < mapData.width && ty >= 0 && ty < mapData.height) {
+                const idx = ty * mapData.width + tx;
+                if (wallsLayer.data[idx] !== 0) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
