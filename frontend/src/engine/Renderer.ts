@@ -124,7 +124,9 @@ export class Renderer {
         this.ctx.strokeStyle = strokeColor;
         this.ctx.stroke();
 
+        let hpVisible = false;
         if (gameState === 'playing' && p.role === 'hider' && p.health < 100) {
+            hpVisible = true;
             this.ctx.fillStyle = CONFIG.COLORS.SEEKER;
             this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, CONFIG.HEALTH_BAR_WIDTH, CONFIG.HEALTH_BAR_HEIGHT);
             this.ctx.fillStyle = CONFIG.COLORS.HIDER;
@@ -134,12 +136,16 @@ export class Renderer {
         if (p.isHost) {
             this.ctx.fillStyle = CONFIG.COLORS.HOST_INDICATOR;
             this.ctx.beginPath();
-            this.ctx.arc(
-                x + CONFIG.HOST_INDICATOR_OFFSET_X, 
-                y + CONFIG.HOST_INDICATOR_OFFSET_Y, 
-                CONFIG.HOST_INDICATOR_RADIUS, 
-                0, Math.PI * 2
-            );
+            
+            let hostX = x;
+            let hostY = y - 30; // Default center top
+            
+            if (hpVisible) {
+                hostX = x + CONFIG.HOST_INDICATOR_OFFSET_X;
+                hostY = y + CONFIG.HOST_INDICATOR_OFFSET_Y;
+            }
+
+            this.ctx.arc(hostX, hostY, CONFIG.HOST_INDICATOR_RADIUS, 0, Math.PI * 2);
             this.ctx.fill();
         }
 
