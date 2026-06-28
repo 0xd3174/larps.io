@@ -1,4 +1,4 @@
-import { CONFIG } from '../config';
+
 import { MapData } from './types';
 
 export class MapManager {
@@ -35,29 +35,4 @@ export class MapManager {
         }
     }
 
-    isWall(x: number, y: number): boolean {
-        if (!this.mapData) return false;
-        const tw = this.mapData.tilewidth;
-        const th = this.mapData.tileheight;
-        
-        const left = Math.floor((x - CONFIG.PLAYER_RADIUS) / tw);
-        const right = Math.floor((x + CONFIG.PLAYER_RADIUS) / tw);
-        const top = Math.floor((y - CONFIG.PLAYER_RADIUS) / th);
-        const bottom = Math.floor((y + CONFIG.PLAYER_RADIUS) / th);
-
-        const wallsLayer = this.mapData.layers.find(l => l.name === 'Walls');
-        if (!wallsLayer) return false;
-
-        for (let ty = top; ty <= bottom; ty++) {
-            for (let tx = left; tx <= right; tx++) {
-                if (tx >= 0 && tx < this.mapData.width && ty >= 0 && ty < this.mapData.height) {
-                    const idx = ty * this.mapData.width + tx;
-                    if (wallsLayer.data[idx] !== 0) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 }

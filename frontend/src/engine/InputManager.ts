@@ -1,8 +1,10 @@
 import { CONFIG } from '../config';
 
 export class InputManager {
-    public dx: number = 0;
-    public dy: number = 0;
+    public up: boolean = false;
+    public down: boolean = false;
+    public left: boolean = false;
+    public right: boolean = false;
     private keys: Record<string, boolean> = {};
 
     constructor() {
@@ -12,26 +14,16 @@ export class InputManager {
 
     update(isChatFocused: boolean) {
         if (isChatFocused) {
-            this.dx = 0;
-            this.dy = 0;
+            this.up = false;
+            this.down = false;
+            this.left = false;
+            this.right = false;
             return;
         }
 
-        let dx = 0; 
-        let dy = 0;
-        
-        if (this.keys['w'] || this.keys['arrowup']) dy -= 1;
-        if (this.keys['s'] || this.keys['arrowdown']) dy += 1;
-        if (this.keys['a'] || this.keys['arrowleft']) dx -= 1;
-        if (this.keys['d'] || this.keys['arrowright']) dx += 1;
-
-        if (dx !== 0 && dy !== 0) {
-            const length = Math.sqrt(dx*dx + dy*dy);
-            dx /= length;
-            dy /= length;
-        }
-
-        this.dx = dx * CONFIG.PLAYER_SPEED;
-        this.dy = dy * CONFIG.PLAYER_SPEED;
+        this.up = !!(this.keys['w'] || this.keys['arrowup']);
+        this.down = !!(this.keys['s'] || this.keys['arrowdown']);
+        this.left = !!(this.keys['a'] || this.keys['arrowleft']);
+        this.right = !!(this.keys['d'] || this.keys['arrowright']);
     }
 }

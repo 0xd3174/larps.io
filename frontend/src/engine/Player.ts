@@ -1,4 +1,3 @@
-import { CONFIG } from '../config';
 import { PlayerData } from './types';
 
 export class Player {
@@ -10,9 +9,6 @@ export class Player {
     public health: number = 100;
     public isHost: boolean = false;
     public isLocal: boolean;
-
-    public vx: number = 0;
-    public vy: number = 0;
 
     constructor(id: string, nickname: string, isLocal: boolean = false) {
         this.id = id;
@@ -26,15 +22,7 @@ export class Player {
         this.health = data.health;
         this.isHost = data.isHost;
         
-        if (this.isLocal) {
-            const distSq = (this.x - data.x)**2 + (this.y - data.y)**2;
-            if (distSq > CONFIG.NETWORK.TELEPORT_DISTANCE_SQ) {
-                this.x = data.x;
-                this.y = data.y;
-            }
-        } else {
-            this.x = data.x;
-            this.y = data.y;
-        }
+        this.x = data.x;
+        this.y = data.y;
     }
 }

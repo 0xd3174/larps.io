@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"math"
 	"math/rand"
 	"time"
 
@@ -81,8 +82,57 @@ func RunRoom(r *models.Room, a *app.App) {
 	for {
 		select {
 		case <-ticker.C:
+			dt := 1.0 / 60.0
+			for c := range r.Clients {
+				var dx, dy float64
+				if c.Up {
+					dy -= 1
+				}
+				if c.Down {
+					dy += 1
+				}
+				if c.Left {
+					dx -= 1
+				}
+				if c.Right {
+					dx += 1
+				}
+
+				if dx != 0 || dy != 0 {
+					length := math.Sqrt(dx*dx + dy*dy)
+					dx /= length
+					dy /= length
+
+					newX := c.X + dx*Config.PlayerSpeed*dt
+					newY := c.Y + dy*Config.PlayerSpeed*dt
+
+					if !IsWall(a.GameMap, newX, newY) {
+						c.X = newX
+						c.Y = newY
+					} else {
+						if !IsWall(a.GameMap, newX, c.Y) {
+							c.X = newX
+						} else if !IsWall(a.GameMap, c.X, newY) {
+							c.Y = newY
+						}
+					}
+
+					if a.GameMap != nil {
+						if c.X < 0 { c.X = 0 }
+						if c.Y < 0 { c.Y = 0 }
+						if c.X > float64(a.GameMap.Width*a.GameMap.TileWidth) { c.X = float64(a.GameMap.Width * a.GameMap.TileWidth) }
+						if c.Y > float64(a.GameMap.Height*a.GameMap.TileHeight) { c.Y = float64(a.GameMap.Height * a.GameMap.TileHeight) }
+					}
+
+					if tx, ty, ok := CheckTeleport(a.GameMap, c.X, c.Y); ok {
+						c.X = tx
+						c.Y = ty
+					}
+				}
+			}
+
 			if r.State == "playing" {
-				r.TimeLeft -= 1.0 / 60.0
+				r.TimeLeft -= dt
 
 				hidersCount := 0
 				seekersCount := 0
@@ -198,7 +248,7 @@ func RunRoom(r *models.Room, a *app.App) {
 					continue
 				}
 
-				if msg["type"] == "move" {
+				if msg["type"] == "input" {
 					senderID, _ := msg["_senderID"].(string)
 					var senderClient *models.Client
 					for c := range r.Clients {
@@ -209,35 +259,19 @@ func RunRoom(r *models.Room, a *app.App) {
 					}
 
 					if senderClient != nil {
-						var newX, newY float64
-						if x, ok := msg["x"].(float64); ok {
-							newX = x
-						} else {
-							newX = senderClient.X
+						if up, ok := msg["up"].(bool); ok {
+							senderClient.Up = up
 						}
-						if y, ok := msg["y"].(float64); ok {
-							newY = y
-						} else {
-							newY = senderClient.Y
+						if down, ok := msg["down"].(bool); ok {
+							senderClient.Down = down
 						}
-
-						if !IsWall(a.GameMap, newX, newY) {
-							senderClient.X = newX
-							senderClient.Y = newY
-						} else {
-							if !IsWall(a.GameMap, newX, senderClient.Y) {
-								senderClient.X = newX
-							} else if !IsWall(a.GameMap, senderClient.X, newY) {
-								senderClient.Y = newY
-							}
+						if left, ok := msg["left"].(bool); ok {
+							senderClient.Left = left
 						}
-
-						if tx, ty, ok := CheckTeleport(a.GameMap, senderClient.X, senderClient.Y); ok {
-							senderClient.X = tx
-							senderClient.Y = ty
+						if right, ok := msg["right"].(bool); ok {
+							senderClient.Right = right
 						}
 					}
-					// We don't broadcast move explicitly, state broadcast will handle it
 					continue
 				}
 

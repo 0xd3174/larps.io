@@ -76,38 +76,30 @@ export class Game {
 
         } else if (msg.type === 'chat') {
             this.ui.appendChat(msg.sender, msg.text, msg.sender === 'SERVER');
-        } else if (msg.type === 'move') {
-            const p = this.players.find(player => player.nickname === msg.nickname);
-            if (p && (!this.localPlayer || p.nickname !== this.localPlayer.nickname)) {
-                p.x = msg.x;
-                p.y = msg.y;
-            }
         }
     }
 
-    private updatePhysics(dt: number) {
+    private lastSentUp = false;
+    private lastSentDown = false;
+    private lastSentLeft = false;
+    private lastSentRight = false;
+
+    private processInput() {
         if (!this.localPlayer) return;
 
         this.input.update(this.isChatFocused);
 
-        const vx = this.input.dx;
-        const vy = this.input.dy;
+        const up = this.input.up;
+        const down = this.input.down;
+        const left = this.input.left;
+        const right = this.input.right;
 
-        if (vx !== 0 || vy !== 0) {
-            const newX = this.localPlayer.x + vx * dt;
-            const newY = this.localPlayer.y + vy * dt;
-
-            if (!this.mapManager.isWall(newX, this.localPlayer.y)) {
-                this.localPlayer.x = newX;
-            }
-            if (!this.mapManager.isWall(this.localPlayer.x, newY)) {
-                this.localPlayer.y = newY;
-            }
-
-            this.localPlayer.x = Math.max(0, Math.min(this.localPlayer.x, this.mapManager.width));
-            this.localPlayer.y = Math.max(0, Math.min(this.localPlayer.y, this.mapManager.height));
-            
-            this.network.sendMove(this.localPlayer.x, this.localPlayer.y);
+        if (up !== this.lastSentUp || down !== this.lastSentDown || left !== this.lastSentLeft || right !== this.lastSentRight) {
+            this.network.sendInput(up, down, left, right);
+            this.lastSentUp = up;
+            this.lastSentDown = down;
+            this.lastSentLeft = left;
+            this.lastSentRight = right;
         }
     }
 
@@ -117,7 +109,7 @@ export class Game {
         this.lastTime = time;
 
         if (this.state !== 'lobby' || this.localPlayer) {
-            this.updatePhysics(dt);
+            this.processInput();
             this.renderer.draw(this.localPlayer, this.players, this.mapManager, this.state);
         } else {
             this.renderer.drawMenuBackground();

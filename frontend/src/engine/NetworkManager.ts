@@ -70,12 +70,14 @@ export class NetworkManager {
         }));
     }
 
-    sendMove(x: number, y: number) {
+    sendInput(up: boolean, down: boolean, left: boolean, right: boolean) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
         this.ws.send(JSON.stringify({
-            type: 'move',
-            x: x,
-            y: y
+            type: 'input',
+            up: up,
+            down: down,
+            left: left,
+            right: right
         }));
     }
 }
