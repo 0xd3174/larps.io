@@ -243,6 +243,7 @@ func RunRoom(r *models.Room, a *app.App) {
 
 				if r.TimeLeft <= 0 {
 					r.State = "lobby"
+					r.SeekersLockedTime = 0
 					sysMsg, _ := json.Marshal(map[string]interface{}{
 						"type":   "chat",
 						"sender": "SERVER",
@@ -252,6 +253,7 @@ func RunRoom(r *models.Room, a *app.App) {
 					BroadcastState(r)
 				} else if hidersCount == 0 && seekersCount > 0 {
 					r.State = "lobby"
+					r.SeekersLockedTime = 0
 					sysMsg, _ := json.Marshal(map[string]interface{}{
 						"type":   "chat",
 						"sender": "SERVER",
