@@ -1,8 +1,10 @@
 export class InputManager {
-    public up: boolean = false;
-    public down: boolean = false;
-    public left: boolean = false;
-    public right: boolean = false;
+    public directions = {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+    };
     private keys: Record<string, boolean> = {};
 
     constructor() {
@@ -11,17 +13,17 @@ export class InputManager {
     }
 
     update(isChatFocused: boolean) {
-        if (isChatFocused) {
-            this.up = false;
-            this.down = false;
-            this.left = false;
-            this.right = false;
+      if (isChatFocused) {
+            this.directions.up = false;
+            this.directions.down = false;
+            this.directions.left = false;
+            this.directions.right = false;
             return;
         }
 
-        this.up = !!(this.keys['w'] || this.keys['arrowup']);
-        this.down = !!(this.keys['s'] || this.keys['arrowdown']);
-        this.left = !!(this.keys['a'] || this.keys['arrowleft']);
-        this.right = !!(this.keys['d'] || this.keys['arrowright']);
+        this.directions.up = !!(this.keys['w'] || this.keys['ц'] || this.keys['arrowup']);
+        this.directions.down = !!(this.keys['s'] || this.keys['ы'] || this.keys['arrowdown']);
+        this.directions.left = !!(this.keys['a'] || this.keys['ф'] || this.keys['arrowleft']);
+        this.directions.right = !!(this.keys['d'] || this.keys['в'] || this.keys['arrowright']);
     }
 }

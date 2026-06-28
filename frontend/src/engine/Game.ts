@@ -89,10 +89,10 @@ export class Game {
 
         this.input.update(this.isChatFocused);
 
-        const up = this.input.up;
-        const down = this.input.down;
-        const left = this.input.left;
-        const right = this.input.right;
+        const up = this.input.directions.up;
+        const down = this.input.directions.down;
+        const left = this.input.directions.left;
+        const right = this.input.directions.right;
 
         if (up !== this.lastSentUp || down !== this.lastSentDown || left !== this.lastSentLeft || right !== this.lastSentRight) {
             this.network.sendInput(up, down, left, right);
