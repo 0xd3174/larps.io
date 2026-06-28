@@ -48,6 +48,8 @@ func HandleChatMessage(r *models.Room, a *app.App, msg map[string]interface{}) {
 				sendPrivate(senderClient, "You don't have permission to use /start. Only the host can start the game.")
 			} else if r.State != "lobby" {
 				sendPrivate(senderClient, "The game is already running.")
+			} else if len(r.Clients) < 2 {
+				sendPrivate(senderClient, "Need at least 2 players to start the game.")
 			} else {
 				StartGame(r, a.GameMap)
 			}
