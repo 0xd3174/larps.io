@@ -233,12 +233,19 @@ func RunRoom(r *models.Room, a *app.App) {
 			BroadcastState(r)
 
 		case client := <-r.Register:
+			r.Mu.Lock()
 			r.Clients[client] = true
+			r.Mu.Unlock()
 			BroadcastState(r)
 
 		case client := <-r.Unregister:
-			if _, ok := r.Clients[client]; ok {
+			r.Mu.Lock()
+			_, ok := r.Clients[client]
+			if ok {
 				delete(r.Clients, client)
+			}
+			r.Mu.Unlock()
+			if ok {
 				close(client.Send)
 
 				if len(r.Clients) == 0 {

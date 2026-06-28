@@ -53,6 +53,16 @@ func ServeWS(a *app.App, w http.ResponseWriter, r *http.Request, roomID, nicknam
 		return
 	}
 
+	room.Mu.Lock()
+	for c := range room.Clients {
+		if c.Nickname == nickname {
+			room.Mu.Unlock()
+			http.Error(w, "Nickname already taken", http.StatusConflict)
+			return
+		}
+	}
+	room.Mu.Unlock()
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
