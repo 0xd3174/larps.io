@@ -2,6 +2,10 @@ import { CONFIG } from '../config';
 import { Player } from './Player';
 import { MapManager } from './MapManager';
 
+const HEALTH_BAR_WIDTH = CONFIG.PLAYER_RADIUS * 2;
+const HOST_INDICATOR_OFFSET_X = CONFIG.PLAYER_RADIUS + 10;
+const HOST_INDICATOR_OFFSET_Y = CONFIG.HEALTH_BAR_OFFSET_Y + CONFIG.HEALTH_BAR_HEIGHT / 2;
+
 export class Renderer {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -128,9 +132,9 @@ export class Renderer {
         if (gameState === 'playing' && p.role === 'hider' && p.health < 100) {
             hpVisible = true;
             this.ctx.fillStyle = CONFIG.COLORS.SEEKER;
-            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, CONFIG.HEALTH_BAR_WIDTH, CONFIG.HEALTH_BAR_HEIGHT);
+            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, HEALTH_BAR_WIDTH, CONFIG.HEALTH_BAR_HEIGHT);
             this.ctx.fillStyle = CONFIG.COLORS.HIDER;
-            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, CONFIG.HEALTH_BAR_WIDTH * (p.health / 100), CONFIG.HEALTH_BAR_HEIGHT);
+            this.ctx.fillRect(x - CONFIG.PLAYER_RADIUS, y + CONFIG.HEALTH_BAR_OFFSET_Y, HEALTH_BAR_WIDTH * (p.health / 100), CONFIG.HEALTH_BAR_HEIGHT);
         }
 
         if (p.isHost) {
@@ -141,8 +145,8 @@ export class Renderer {
             let hostY = y - 36; // Default center top
 
             if (hpVisible) {
-                hostX = x + CONFIG.HOST_INDICATOR_OFFSET_X;
-                hostY = y + CONFIG.HOST_INDICATOR_OFFSET_Y;
+                hostX = x + HOST_INDICATOR_OFFSET_X;
+                hostY = y + HOST_INDICATOR_OFFSET_Y;
             }
 
             this.ctx.arc(hostX, hostY, CONFIG.HOST_INDICATOR_RADIUS, 0, Math.PI * 2);
